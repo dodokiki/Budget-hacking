@@ -2,6 +2,8 @@
 
 สารคดีข้อมูล (scrollytelling) เล่า 6 เรื่องที่พบจากการอ่านเอกสารงบประมาณของรัฐไทย 318 ไฟล์
 
+โดย **Watcharapol Limthammalert** — **AI Trainer Thailand**
+
 หน้าเว็บเป็นไฟล์เดียวจบ ไม่มี dependency ไม่มี build step — `index.html` เปิดได้เลย
 
 ## เนื้อหา 6 บท
