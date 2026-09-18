@@ -1,0 +1,1090 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>ตามรอยงบประมาณ</title>
+<meta name="description" content="สารคดีข้อมูล 6 เรื่องจากเอกสารงบประมาณของรัฐ 318 ไฟล์ — กมธ.ติดตามงบประมาณ 2569, PBO 11 ปี, ร่าง พ.ร.บ. งบ 2570 และงบท้องถิ่น">
+<style>[hidden]{display:none!important}</style>
+</head>
+<body>
+<style>
+  :root{
+    --bg:#07090d;
+    --ink:#f2f6fa;
+    --muted:#93a1b0;
+    --dim:#61707e;
+    --gold:#f0b429;
+    --gold-dim:#8a6d2c;
+    --alert:#ff5a4d;
+    --alert-dim:#5c2b27;
+    --teal:#2fd3b5;
+    --line:#222c38;
+    font-family:'Sarabun',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{height:auto;scroll-snap-type:y mandatory;scroll-behavior:auto;background:var(--bg);}
+  body{background:var(--bg);color:var(--ink);margin:0;overscroll-behavior-y:none;}
+
+  #money{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;}
+  .veil{
+    position:fixed;inset:0;z-index:1;pointer-events:none;
+    background:linear-gradient(180deg, rgba(7,9,13,.94) 0%, rgba(7,9,13,.8) 24%, rgba(7,9,13,.32) 42%, rgba(7,9,13,0) 54%);
+  }
+  /* The year sits above the veil — drawn on the canvas it was dimmed to a shadow. */
+  .raceyear{
+    position:fixed;right:5%;top:25%;z-index:3;text-align:right;pointer-events:none;
+  }
+  .ry-lab{display:block;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.12em;color:var(--muted);margin-bottom:2px;}
+  .ry-val{
+    display:block;font-family:'JetBrains Mono',monospace;font-weight:700;
+    font-size:clamp(52px,11vw,108px);line-height:1;letter-spacing:-.02em;color:var(--gold);
+  }
+  .raceyear.gap .ry-val{color:var(--alert);}
+  .ry-note{
+    display:block;font-size:12.5px;color:var(--alert);margin-top:8px;max-width:270px;
+    margin-left:auto;line-height:1.5;opacity:0;transition:opacity .25s ease;
+  }
+  .raceyear.gap .ry-note{opacity:1;}
+  .ry-note .nb{white-space:nowrap;}     /* lines may break only between phrases */
+  /* keep the race headline clear of the year block */
+  [data-scene="race"] .headline,[data-scene="clinic"] .headline,[data-scene="fund"] .headline,
+  .beat:has(.chartwrap) .headline{max-width:560px;}
+  @media (max-width:560px){
+    /* no room beside the text on a phone — drop the year into the gap above the columns */
+    .raceyear{top:38%;right:5%;}
+    .ry-val{font-size:44px;}
+    .ry-note{font-size:11.5px;max-width:200px;}
+  }
+  .beats{position:fixed;inset:0;z-index:2;pointer-events:none;}
+  .hud{position:fixed;inset:0;z-index:20;pointer-events:none;display:flex;flex-direction:column;}
+  .grain{
+    position:fixed;inset:0;z-index:30;pointer-events:none;opacity:.03;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .runway{position:relative;z-index:0;}
+  .spacer{height:100dvh;scroll-snap-align:start;scroll-snap-stop:always;}
+
+  .progress-row{display:flex;gap:3px;padding:calc(env(safe-area-inset-top,0px) + 13px) 16px 0 16px;}
+  .seg{flex:1;height:2px;border-radius:2px;background:rgba(255,255,255,.13);overflow:hidden;}
+  .seg > i{display:block;height:100%;width:100%;background:var(--gold);border-radius:2px;transform:scaleX(0);transform-origin:left center;}
+
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:9px 16px 0 16px;gap:10px;}
+  .brand{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;}
+  .brand b{color:var(--gold);}
+  .topright{display:flex;align-items:center;gap:10px;pointer-events:auto;}
+  #chapTag{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--dim);letter-spacing:.08em;white-space:nowrap;}
+  .playbtn{
+    display:inline-flex;align-items:center;gap:7px;
+    background:rgba(16,21,28,.82);border:1px solid var(--line);color:var(--muted);
+    border-radius:999px;padding:6px 13px;cursor:pointer;
+    font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.04em;white-space:nowrap;
+  }
+  .playbtn:hover{color:var(--ink);border-color:var(--dim);}
+  .playbtn.on{color:var(--gold);border-color:var(--gold-dim);}
+
+  /* Beats sit in the top band; the money stacks in the bottom band. */
+  .beat{
+    position:absolute;left:0;right:0;
+    top:calc(env(safe-area-inset-top,0px) + 62px);
+    height:auto;max-height:52dvh;
+    display:flex;flex-direction:column;justify-content:flex-start;
+    padding:0 28px;max-width:820px;
+    opacity:0;visibility:hidden;
+  }
+  .beat.center{top:0;height:100dvh;justify-content:center;max-height:none;}
+  .beat > *{opacity:0;transform:translateY(16px);transition:opacity .5s ease, transform .55s cubic-bezier(.2,.7,.2,1);}
+  .beat.on > *{opacity:1;transform:translateY(0);}
+  .beat.on > *:nth-child(1){transition-delay:.04s;}
+  .beat.on > *:nth-child(2){transition-delay:.12s;}
+  .beat.on > *:nth-child(3){transition-delay:.2s;}
+  .beat.on > *:nth-child(4){transition-delay:.28s;}
+  .beat.on > *:nth-child(5){transition-delay:.36s;}
+
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.16em;color:var(--gold);text-transform:uppercase;margin-bottom:10px;}
+  .eyebrow.alert{color:var(--alert);}
+  .eyebrow.teal{color:var(--teal);}
+
+  .headline{font-size:clamp(24px,5.4vw,44px);font-weight:700;line-height:1.14;text-wrap:balance;margin:0 0 12px 0;max-width:700px;letter-spacing:-.01em;}
+  .sub{color:var(--muted);font-size:clamp(14px,2.4vw,17px);line-height:1.6;max-width:560px;margin:0 0 14px 0;}
+  .sub b{color:var(--ink);font-weight:600;}
+
+  .bignum{
+    font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;font-weight:700;
+    font-size:clamp(54px,14vw,120px);line-height:.94;letter-spacing:-.03em;color:var(--gold);
+    display:flex;align-items:baseline;gap:12px;margin:0 0 8px 0;flex-wrap:wrap;
+  }
+  .bignum small{font-family:'Sarabun',sans-serif;font-size:clamp(15px,2.6vw,22px);color:var(--muted);font-weight:600;letter-spacing:0;}
+  .bignum.alert{color:var(--alert);}
+
+  .caption{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--dim);margin-top:10px;padding-top:9px;border-top:1px solid var(--line);max-width:540px;line-height:1.6;}
+  .caption b{color:var(--muted);font-weight:600;}
+
+  .badge{
+    display:inline-flex;align-items:center;gap:6px;
+    font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;
+    background:rgba(255,90,77,.14);color:#ffb3ac;border:1px solid var(--alert);
+    border-radius:999px;padding:5px 13px;margin:2px 0 0 0;width:fit-content;
+  }
+  .badge.gold{background:rgba(240,180,41,.14);color:var(--gold);border-color:var(--gold-dim);}
+  .badge.teal{background:rgba(47,211,181,.12);color:var(--teal);border-color:var(--teal);}
+
+  .quote{font-size:clamp(20px,4.2vw,32px);font-style:italic;color:var(--ink);border-left:3px solid var(--alert);padding-left:18px;max-width:560px;line-height:1.4;margin:2px 0 8px 0;}
+  .quote .src{display:block;margin-top:12px;font-style:normal;font-size:11.5px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+
+  .tagrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;}
+  .tag{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:4px 10px;}
+
+  .chapindex{display:flex;flex-direction:column;gap:7px;max-width:560px;margin:0 0 6px 0;}
+  .ci-row{display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--line);padding-bottom:6px;}
+  .ci-n{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--gold);font-weight:700;flex-shrink:0;}
+  .ci-t{font-size:clamp(14px,2.7vw,17px);color:var(--ink);}
+  .ci-row.r2 .ci-n,.ci-row.r3 .ci-n,.ci-row.r5 .ci-n{color:var(--alert);}
+
+  .chapter .capn{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;margin-bottom:10px;}
+  .chapter h1{font-size:clamp(30px,7.4vw,58px);margin:0 0 10px 0;max-width:640px;line-height:1.08;letter-spacing:-.015em;}
+  .chapter .teaser{font-size:clamp(14px,2.7vw,18px);color:var(--muted);max-width:460px;margin:0 0 12px 0;}
+  .chapter.accent-alert .capn{color:var(--alert);}
+  .chapter.accent-gold .capn{color:var(--gold);}
+  .ctx{font-size:13px;color:var(--dim);max-width:450px;line-height:1.55;border-left:2px solid var(--line);padding-left:12px;margin:0;}
+  .rulewrap{max-width:380px;margin-bottom:14px;}
+  .rule{display:block;height:2px;background:linear-gradient(90deg,var(--gold),transparent);transform:scaleX(0);transform-origin:left center;transition:transform 1s cubic-bezier(.2,.7,.2,1) .15s;}
+  .beat.on .rule{transform:scaleX(1);}
+  .accent-alert .rule{background:linear-gradient(90deg,var(--alert),transparent);}
+
+  /* the 11-year line chart keeps its own precise form */
+  .chartwrap{max-width:560px;width:100%;margin:0 0 4px 0;}
+  .chartwrap svg{width:100%;height:auto;display:block;overflow:visible;}
+  .ax-line{stroke:var(--line);stroke-width:1;}
+  .ax-txt{fill:var(--dim);font-family:'JetBrains Mono',monospace;font-size:9.5px;}
+  .ref-line{stroke:var(--dim);stroke-width:1;stroke-dasharray:3 4;opacity:0;transition:opacity .6s ease .9s;}
+  .beat.on .ref-line{opacity:.7;}
+  .area-path{fill:url(#areaGrad);opacity:0;transition:opacity 1s ease 1.3s;}
+  .beat.on .area-path{opacity:1;}
+  .line-path{fill:none;stroke:var(--gold);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round;}
+  .end-dot{fill:var(--gold);opacity:0;transition:opacity .4s ease 1.5s;}
+  .beat.on .end-dot{opacity:1;}
+  .end-lbl{fill:var(--gold);font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;opacity:0;transition:opacity .5s ease 1.6s;}
+  .beat.on .end-lbl{opacity:1;}
+
+  /* three bids differ by under 4% — a zoomed number line, not bars */
+  .numline{position:relative;max-width:470px;height:120px;margin:4px 0 8px 0;}
+  .nl-axis{position:absolute;left:0;right:0;top:80px;height:1px;background:var(--line);}
+  .nl-tick{position:absolute;top:80px;width:1px;height:5px;background:var(--line);}
+  .nl-tlab{position:absolute;top:91px;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--dim);}
+  .nl-unit{position:absolute;right:0;top:105px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--dim);}
+  .nl-ref{position:absolute;top:26px;height:54px;width:0;border-left:2px dashed var(--gold);transform:scaleY(0);transform-origin:bottom center;transition:transform .8s cubic-bezier(.2,.7,.2,1) .15s;}
+  .beat.on .nl-ref{transform:scaleY(1);}
+  .nl-reflab{position:absolute;top:4px;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--gold);white-space:nowrap;opacity:0;transition:opacity .5s ease .8s;}
+  .beat.on .nl-reflab{opacity:1;}
+  .nl-dot{position:absolute;top:74px;width:13px;height:13px;margin-left:-6.5px;border-radius:50%;background:#8494a2;transform:scale(0);transition:transform .55s cubic-bezier(.3,1.5,.5,1);}
+  .nl-dot.win{background:var(--alert);width:17px;height:17px;top:72px;margin-left:-8.5px;}
+  .nl-dot.win.snap{animation:snapdot .6s ease-out;}
+  @keyframes snapdot{
+    0%{box-shadow:0 0 0 rgba(255,90,77,0);}
+    35%{box-shadow:0 0 0 9px rgba(255,90,77,.34);}
+    100%{box-shadow:0 0 0 18px rgba(255,90,77,0);}
+  }
+  .nl-vlab{position:absolute;top:50px;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;font-size:12.5px;color:var(--muted);white-space:nowrap;opacity:0;transition:opacity .4s ease;}
+  .nl-vlab.win{color:var(--alert);font-weight:700;}
+
+  .scrollcue{
+    position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 14px);
+    text-align:center;z-index:21;pointer-events:none;
+    font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--dim);letter-spacing:.1em;
+    transition:opacity .6s ease;
+  }
+  .scrollcue .arrow{display:block;margin:6px auto 0;width:1px;height:20px;background:linear-gradient(180deg,var(--dim),transparent);}
+
+  @media (max-width:560px){
+    .beat{padding:0 18px;max-height:46dvh;}
+    #chapTag{display:none;}
+  }
+  /* Desktop / projector: the supporting text was sized for a phone in the hand.
+     Headlines and big numbers already scale; these small roles did not. */
+  @media (min-width:1100px){
+    /* Nothing is pinned to a pixel cap any more: type, boxes and the two DOM visuals
+       follow the viewport width, so a 2000px screen is used as a 2000px screen. */
+    .beat{padding:0 40px;max-width:min(1200px, 84vw);}
+    .beat.center{width:min(1200px, calc(100% - 120px));margin-left:auto;margin-right:auto;}
+    .headline{font-size:clamp(30px,3.3vw,62px);max-width:min(1000px,72vw);}
+    .chapter h1{font-size:clamp(36px,4.8vw,88px);max-width:min(1000px,72vw);}
+    .bignum{font-size:clamp(70px,10.5vw,180px);}
+    .bignum small{font-size:clamp(18px,1.6vw,28px);}
+    .quote{font-size:clamp(24px,2.7vw,44px);max-width:min(820px,60vw);}
+    .eyebrow{font-size:clamp(13.5px,0.95vw,17px);margin-bottom:12px;}
+    .sub{font-size:clamp(17px,1.25vw,22px);max-width:min(720px,52vw);}
+    .caption{font-size:clamp(12.5px,0.85vw,15px);max-width:min(720px,52vw);}
+    .ctx{font-size:clamp(14.5px,1vw,18px);max-width:min(620px,46vw);}
+    .badge{font-size:clamp(15px,1.05vw,19px);padding:8px 18px;margin-top:8px;}   /* the takeaway line earns its size */
+    .chapter .teaser{font-size:clamp(20px,1.4vw,26px);max-width:min(620px,46vw);}
+    .ci-t{font-size:clamp(18px,1.3vw,23px);} .ci-n{font-size:clamp(12px,0.9vw,15px);}
+    .tag{font-size:clamp(11px,0.8vw,14px);}
+    .brand,#chapTag{font-size:clamp(12px,0.85vw,14px);}
+    .playbtn{font-size:clamp(12.5px,0.9vw,15px);padding:8px 16px;}
+    .ry-lab{font-size:clamp(13px,0.95vw,16px);}
+    .ry-val{font-size:clamp(90px,9vw,170px);}
+    .ry-note{font-size:clamp(12.5px,0.95vw,16px);max-width:min(360px,24vw);}
+    /* the two DOM visuals fill the width — they have no money columns beneath them */
+    .chartwrap{max-width:min(1400px,80vw);}
+    .numline{max-width:min(1400px,80vw);height:150px;}
+    .nl-axis{top:104px;} .nl-tick{top:104px;height:7px;} .nl-tlab{top:118px;font-size:12.5px;}
+    .nl-unit{top:134px;font-size:12px;}
+    .nl-ref{top:34px;height:70px;} .nl-reflab{top:8px;font-size:13.5px;}
+    .nl-dot{top:97px;width:15px;height:15px;margin-left:-7.5px;}
+    .nl-dot.win{width:21px;height:21px;top:94px;margin-left:-10.5px;}
+    .nl-vlab{top:66px;font-size:16px;}
+  }
+  /* the number line is laid out in px, so it is scaled as a whole on wider screens */
+  @media (min-width:1400px){ .numline{zoom:1.2;} }
+  @media (min-width:1800px){ .numline{zoom:1.45;} }
+  @media (min-width:2200px){ .numline{zoom:1.7;} }
+  @media (prefers-reduced-motion: reduce){
+    .beat > *,.beat.on > *{transition:none;transform:none;opacity:1;}
+    .rule,.area-path,.ref-line,.end-dot,.end-lbl,.nl-ref,.nl-dot,.nl-vlab,.nl-reflab{transition:none !important;}
+  }
+</style>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap">
+
+<canvas id="money"></canvas>
+<div class="veil"></div>
+
+<div class="beats" id="beats">
+
+  <section class="beat center" data-chap="0" data-duration="4600" data-scene="rain">
+    <div class="eyebrow">สารคดีข้อมูล</div>
+    <h1 class="headline">ตามรอยงบประมาณ 2570</h1>
+    <p class="sub">6 เรื่องที่พบ จากการอ่านเอกสารงบประมาณของรัฐ 318 ไฟล์</p>
+    <div class="tagrow">
+      <span class="tag">PBO</span><span class="tag">สตง.</span><span class="tag">สปสช.</span><span class="tag">สปส.</span><span class="tag">งบท้องถิ่น</span>
+    </div>
+  </section>
+
+  <section class="beat center" data-chap="0" data-duration="5600" data-scene="rain">
+    <div class="eyebrow">เรื่องนี้เริ่มจากกองเอกสาร</div>
+    <h1 class="headline">ทุกครั้งที่กรรมาธิการเรียกถาม หน่วยงานรัฐต้องส่งเอกสารมาชี้แจง</h1>
+    <p class="sub">ปี 2569 คณะกรรมาธิการติดตามงบประมาณ ประชุม <b>13 ครั้ง</b> เรียกหน่วยงานมาชี้แจง <b>28 หน่วยงาน</b> เอกสารเป็นข้อมูลเปิดทั้งหมด — แต่มีเป็นพันหน้า และแทบไม่มีใครอ่านจนจบ</p>
+  </section>
+
+  <section class="beat center" data-chap="0" data-duration="6000" data-scene="rain">
+    <div class="eyebrow">เราอ่านครบทุกไฟล์</div>
+    <h1 class="headline">318 ไฟล์ จาก 4 แหล่งข้อมูล</h1>
+    <div class="chapindex">
+      <div class="ci-row r1"><span class="ci-n">01</span><span class="ci-t">เงินถึงมือคนไม่เท่ากัน</span></div>
+      <div class="ci-row r2"><span class="ci-n">02</span><span class="ci-t">บัญชีประกันสังคมที่ตรวจไม่ได้</span></div>
+      <div class="ci-row r3"><span class="ci-n">03</span><span class="ci-t">คลินิกที่โตเร็วเกินไป</span></div>
+      <div class="ci-row r4"><span class="ci-n">04</span><span class="ci-t">กองทุนที่มีเงินนอนนิ่ง</span></div>
+      <div class="ci-row r5"><span class="ci-n">05</span><span class="ci-t">ราคากลางที่ตรงกับผู้ชนะเป๊ะ</span></div>
+      <div class="ci-row r6"><span class="ci-n">06</span><span class="ci-t">ก้อนเงินที่ใหญ่กว่าทุกกระทรวง</span></div>
+    </div>
+  </section>
+
+  <section class="beat" data-chap="0" data-duration="5200" data-scene="total">
+    <div class="eyebrow gold">งบประมาณแผ่นดิน ปี 2570</div>
+    <div class="bignum" id="nBudget">0.00<small>ล้านล้านบาท</small></div>
+    <p class="sub">จาก 96,470 รายการทั่วประเทศ — ทุกแท่งต่อจากนี้ คือเงินก้อนนี้ที่ถูกแบ่งออกไป</p>
+  </section>
+
+  <section class="beat center" data-chap="0" data-duration="6800" data-scene="drift">
+    <div class="eyebrow">งบประมาณรายจ่ายประจำปี 2558–2568</div>
+    <h1 class="headline">11 ปี งบประเทศโตขึ้น 45.7%</h1>
+    <div class="chartwrap">
+      <svg id="budgetSvg" viewBox="0 0 580 176" role="img" aria-label="กราฟงบประมาณรายจ่ายประจำปี 2558 ถึง 2568">
+        <defs>
+          <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#f0b429" stop-opacity="0.32"/>
+            <stop offset="100%" stop-color="#f0b429" stop-opacity="0.02"/>
+          </linearGradient>
+        </defs>
+        <g id="chartAxes"></g>
+        <path id="chartArea" class="area-path" d=""/>
+        <line id="chartRef" class="ref-line" x1="0" y1="0" x2="0" y2="0"/>
+        <path id="chartLine" class="line-path" d=""/>
+        <circle id="chartDot" class="end-dot" cx="0" cy="0" r="4.5"/>
+        <text id="chartEndLbl" class="end-lbl" x="0" y="0" text-anchor="end">3.75</text>
+      </svg>
+    </div>
+    <div class="caption">เส้นประ = ระดับปี 2558 · หน่วย: ล้านล้านบาท · ที่มา: <b>PBO</b> (รวม พ.ร.บ. งบประมาณเพิ่มเติม)</div>
+  </section>
+
+  <section class="beat center chapter accent-gold" data-chap="1" data-duration="4200" data-scene="swirl">
+    <div class="capn">บทที่ 1</div>
+    <div class="rulewrap"><i class="rule"></i></div>
+    <h1>เงินถึงมือคนไม่เท่ากัน</h1>
+    <p class="teaser">สองจังหวัด หนึ่งตำบล และคำถามว่าใครได้มากกว่าใคร</p>
+    <p class="ctx">งบท้องถิ่น คือเงินที่จ่ายค่าถนน ค่าเก็บขยะ เบี้ยผู้สูงอายุ ในพื้นที่ที่คุณอยู่ — ยิ่งท้องถิ่นมีงบต่างกัน บริการที่แต่ละคนได้ก็ยิ่งต่างกัน</p>
+  </section>
+
+  <section class="beat" data-chap="1" data-duration="6200" data-scene="prov">
+    <div class="eyebrow">งบ อบจ. ปี 2570 · งบรวมทั้งข้อบัญญัติ</div>
+    <h1 class="headline">สมุทรปราการตั้งงบสูงกว่า ทั้งที่ประชากรน้อยกว่า</h1>
+    <span class="badge">ตกราว 2,280 บาท/คน เทียบกับ 1,540 บาท/คน</span>
+    <div class="caption">งบจาก<b>ข้อบัญญัติงบประมาณ อบจ. ปี 2570</b> · ตัวเลขประชากรจดทะเบียนเป็นข้อมูลภายนอก ไม่ได้อยู่ในชุดเอกสารนี้</div>
+  </section>
+
+  <section class="beat center" data-chap="1" data-duration="4800" data-scene="drift">
+    <div class="eyebrow teal">แล้วเงินอุดหนุนที่ลงไปถึงเทศบาลล่ะ</div>
+    <h1 class="headline">เทศบาล 131 แห่งในเชียงใหม่ แบ่งเงินอุดหนุนรวม 6,446 ล้านบาท</h1>
+    <p class="sub">เฉลี่ยแห่งละราว 49 ล้านบาท — นี่คือเงินอุดหนุนจาก พ.ร.บ. งบประมาณ ไม่ใช่งบรวมของเทศบาล</p>
+  </section>
+
+  <section class="beat" data-chap="1" data-duration="6400" data-scene="tambon">
+    <div class="eyebrow alert">เทียบงบรวมกับงบรวม</div>
+    <h1 class="headline">อบต. ระดับตำบลแห่งเดียว มีงบเกือบ 1 ใน 3 ของเทศบาลนครเชียงใหม่</h1>
+    <span class="badge">อบต. เดียว = 31% ของเทศบาลนครทั้งเมือง</span>
+    <div class="caption">ข้อบัญญัติงบประมาณปี 2570 ของแต่ละแห่ง (งบรวม นับรายได้ของตนเองด้วย)</div>
+  </section>
+
+  <section class="beat center chapter accent-alert" data-chap="2" data-duration="4200" data-scene="swirl">
+    <div class="capn">บทที่ 2</div>
+    <div class="rulewrap"><i class="rule"></i></div>
+    <h1>บัญชีที่ตรวจไม่ได้</h1>
+    <p class="teaser">ผู้ตรวจเงินแผ่นดิน เปิดงบการเงินสำนักงานประกันสังคม</p>
+    <p class="ctx">สปส. ดูแลเงินที่หักจากเงินเดือนคนทำงานทุกเดือน ส่วน สตง. คือผู้ตรวจเงินแผ่นดิน มีหน้าที่ตรวจว่าหน่วยงานรัฐใช้เงินตรงตามบัญชีหรือไม่</p>
+  </section>
+
+  <section class="beat" data-chap="2" data-duration="5000" data-scene="sso1">
+    <div class="eyebrow alert">ความคลาดเคลื่อนแรก</div>
+    <h1 class="headline">ระบบบัญชีภายใน กับระบบกลางภาครัฐ ตัวเลขไม่ตรงกัน</h1>
+    <div class="bignum alert" id="nSso1">0<small>ล้านบาท</small></div>
+  </section>
+
+  <section class="beat" data-chap="2" data-duration="5400" data-scene="sso2">
+    <div class="eyebrow alert">ตรวจลึกลงไปอีกชั้น</div>
+    <h1 class="headline">ทรัพย์สินจริง กับทะเบียนครุภัณฑ์ในระบบ ต่างกันไปอีก</h1>
+    <div class="bignum alert" id="nSso2">0<small>ล้านบาท</small></div>
+  </section>
+
+  <section class="beat center" data-chap="2" data-duration="5600" data-scene="drift">
+    <div class="eyebrow alert">ผลสรุปจาก สตง.</div>
+    <h1 class="headline">"ไม่แสดงความเห็น" ต่องบการเงิน สปส. ปี 2568</h1>
+    <p class="sub">แปลว่าผู้ตรวจ<b>ไม่สามารถยืนยันได้</b>ว่าตัวเลขในงบการเงินถูกต้องหรือไม่ — เป็นระดับความเห็นที่หนักที่สุดที่ผู้สอบบัญชีจะให้ได้</p>
+    <span class="badge">DISCLAIMER OF OPINION</span>
+    <div class="caption">ที่มา: กมธ.ติดตามงบประมาณ ครั้งที่ 8 (2 ก.ค. 2569) — สตง. x สปส.</div>
+  </section>
+
+  <section class="beat center chapter accent-alert" data-chap="3" data-duration="4200" data-scene="swirl">
+    <div class="capn">บทที่ 3</div>
+    <div class="rulewrap"><i class="rule"></i></div>
+    <h1>คลินิกที่โตเร็วเกินไป</h1>
+    <p class="teaser">เมื่องบพุ่ง 3 เท่า แล้วโรงพยาบาลเองเป็นคนออกมาเตือน</p>
+    <p class="ctx">สปสช. คือหน่วยงานที่ดูแลสิทธิบัตรทอง (30 บาทรักษาทุกโรค) — เงินที่จ่ายให้คลินิกจึงมาจากงบก้อนเดียวกับที่ดูแลคนทั้งประเทศ</p>
+  </section>
+
+  <section class="beat" data-chap="3" data-duration="16000" data-scene="clinic">
+    <div class="eyebrow alert">งบโครงการ "คลินิกนวัตกรรม"</div>
+    <h1 class="headline">พุ่งขึ้นกว่า 3 เท่าในปีเดียว แล้วถูกตัดกลับ</h1>
+    <div class="caption">หน่วย: ล้านบาท · ปี 2569 คือยอดที่ถูกตัดกลับลงมาระหว่างปี</div>
+  </section>
+
+  <section class="beat center" data-chap="3" data-duration="4800" data-scene="drift">
+    <div class="eyebrow alert">คำเตือนจากคนในระบบเอง</div>
+    <div class="quote">"โอกาสเกิดการทุจริตสูง"<span class="src">— โรงพยาบาลในเครือข่าย รายงานถึงคณะกรรมการ</span></div>
+  </section>
+
+  <section class="beat center" data-chap="3" data-duration="4400" data-scene="drift">
+    <div class="eyebrow">สปสช. ตอบโต้</div>
+    <h1 class="headline">ลดเรทเบิกจ่าย และบังคับสแกนใบหน้ายืนยันตัวตนผู้ป่วยทุกครั้ง</h1>
+    <p class="sub">ถ้าการเบิกจ่ายที่ผ่านมาเป็นของจริงทั้งหมด ยอดผู้ใช้บริการก็ไม่ควรเปลี่ยนมากนัก</p>
+  </section>
+
+  <section class="beat" data-chap="3" data-duration="7000" data-scene="visits">
+    <div class="eyebrow alert">ยอดใช้บริการ ครั้ง/สัปดาห์</div>
+    <h1 class="headline">เงินครึ่งหนึ่งหายไปจากระบบ ทันทีที่ต้องยืนยันตัวตน</h1>
+    <span class="badge">เหลือ 44% ของเดิม · ผ่านออดิตใหม่แค่ 49% ของคลินิก</span>
+    <div class="caption">ที่มา: กมธ.ติดตามงบประมาณ ครั้งที่ 13 (20 ส.ค. 2569) — สปสช.</div>
+  </section>
+
+  <section class="beat center chapter accent-gold" data-chap="4" data-duration="4200" data-scene="swirl">
+    <div class="capn">บทที่ 4</div>
+    <div class="rulewrap"><i class="rule"></i></div>
+    <h1>เงินที่นอนหลับ</h1>
+    <p class="teaser">กองทุนที่เก็บเงินไว้มากกว่าที่ส่งคืนแผ่นดิน</p>
+    <p class="ctx">กองทุนอนุรักษ์พลังงาน เก็บเงินจากค่าน้ำมันและค่าไฟที่ทุกคนจ่าย เพื่อเอาไปลงทุนด้านพลังงานสะอาด — เงินที่กองอยู่เฉยๆ คือเงินที่ยังไม่ได้ทำงาน</p>
+  </section>
+
+  <section class="beat" data-chap="4" data-duration="24000" data-scene="fund">
+    <div class="eyebrow gold">กองทุนอนุรักษ์พลังงาน 2560 → 2568</div>
+    <h1 class="headline">เงินสดนอนอยู่หลักหมื่นล้านทุกปี ขณะที่เงินที่ใช้จริงลดเหลือ 198 ล้าน</h1>
+    <div class="caption">หน่วย: ล้านบาท · ที่มา: ตาราง NBMS ของกองทุน ผ่าน กมธ.ติดตามงบประมาณ ครั้งที่ 12 · ยอดนำส่งคลังปี 2568 ยังอยู่ระหว่างเสนอ ครม.</div>
+  </section>
+
+  <section class="beat center chapter accent-alert" data-chap="5" data-duration="4200" data-scene="swirl">
+    <div class="capn">บทที่ 5</div>
+    <div class="rulewrap"><i class="rule"></i></div>
+    <h1>ราคากลางที่ "บังเอิญ" ตรงเป๊ะ</h1>
+    <p class="teaser">เมื่อผู้ชนะประมูล เสนอราคาตรงกับราคากลางพอดิบพอดี</p>
+    <p class="ctx">ราคากลาง คือราคาที่หน่วยงานรัฐคำนวณไว้ก่อนเปิดประมูล เพื่อเป็นหลักว่าไม่ควรซื้อแพงเกินไป — โดยหลักการ ไม่มีผู้เสนอราคารายใดควรรู้ตัวเลขนี้ล่วงหน้า</p>
+  </section>
+
+  <section class="beat center" data-chap="5" data-duration="8000" data-scene="drift">
+    <div class="eyebrow alert">โครงการสื่อดิจิทัล ศธ. 195.6 ล้านบาท · ผู้ยื่นราคา 3 ราย</div>
+    <div class="numline" id="numLine">
+      <div class="nl-reflab" id="nlRefLab">ราคากลาง = ผู้ชนะ</div>
+      <div class="nl-ref" id="nlRef"></div>
+      <div class="nl-axis"></div>
+      <div class="nl-vlab win" id="nlLab1">195.6</div>
+      <div class="nl-vlab" id="nlLab2">198.0</div>
+      <div class="nl-vlab" id="nlLab3">204.0</div>
+      <div class="nl-dot win" id="nlDot1"></div>
+      <div class="nl-dot" id="nlDot2"></div>
+      <div class="nl-dot" id="nlDot3"></div>
+      <div class="nl-unit">ล้านบาท</div>
+    </div>
+    <span class="badge">ราคาผู้ชนะหยุดตรงเส้นราคากลางพอดี — รูปแบบที่ใช้เป็นสัญญาณเสี่ยงฮั้วประมูล</span>
+    <div class="caption">ที่มา: กมธ.ติดตามงบประมาณ ครั้งที่ 4 (4 มิ.ย. 2569) — โครงการ NDLP ศธ.</div>
+  </section>
+
+  <section class="beat center chapter accent-alert" data-chap="6" data-duration="4200" data-scene="swirl">
+    <div class="capn">บทที่ 6</div>
+    <div class="rulewrap"><i class="rule"></i></div>
+    <h1>ก้อนเงินที่ใหญ่กว่าทุกกระทรวง</h1>
+    <p class="teaser">งบก้อนเดียวที่โตขึ้นเรื่อยๆ โดยไม่ต้องระบุโครงการล่วงหน้า</p>
+    <p class="ctx">งบกระทรวงทั่วไปต้องแจกแจงเป็นรายโครงการตั้งแต่ตอนขอ แต่ "งบกลาง" ไม่ต้อง — รัฐบาลจัดสรรได้ภายหลังตามที่เห็นสมควร</p>
+  </section>
+
+  <section class="beat" data-chap="6" data-duration="28000" data-scene="race">
+    <div class="eyebrow alert">งบรายกระทรวง 2558 → 2568</div>
+    <h1 class="headline">ปี 2563 งบกลางแซงทุกกระทรวง แล้วไม่เคยคืนตำแหน่ง</h1>
+    <div class="caption" id="raceNote">หน่วย: ล้านบาท · ที่มา: <b>PBO</b> ปี 2558–2568</div>
+  </section>
+
+  <section class="beat" data-chap="6" data-duration="6000" data-scene="share">
+    <div class="eyebrow alert">ส่วนแบ่งในงบประเทศ</div>
+    <h1 class="headline">งบกลางกินสัดส่วนงบประเทศ จาก 14.6% เป็น 22.4%</h1>
+    <p class="sub">ยิ่งงบกลางใหญ่ ส่วนของงบประมาณที่ตรวจสอบรายโครงการได้ล่วงหน้าก็ยิ่งเล็กลง</p>
+    <div class="caption">ที่มา: <b>PBO</b> ข้อมูลงบประมาณรายจ่ายเปรียบเทียบ ปี 2558–2568</div>
+  </section>
+
+  <section class="beat center" data-chap="0" data-duration="9000" data-scene="rain">
+    <div class="eyebrow teal">ทั้งหมดนี้ไม่ใช่ความลับ</div>
+    <h1 class="headline">เอกสารเปิดเผยอยู่แล้ว แค่ไม่มีใครมีเวลาอ่าน</h1>
+    <p class="sub">318 ไฟล์ จากการประชุม กมธ.ติดตามงบประมาณ 13 ครั้ง · ข้อมูล PBO 11 ปีงบประมาณ · ร่าง พ.ร.บ. งบ 2570 · งบท้องถิ่น 2 จังหวัด</p>
+    <div class="tagrow"><span class="tag">เลื่อนขึ้นเพื่อดูอีกครั้ง</span></div>
+  </section>
+
+</div>
+
+<div class="hud">
+  <div class="progress-row" id="progressRow"></div>
+  <div class="topbar">
+    <div class="brand">ตามรอยงบ<b>ประมาณ</b></div>
+    <div class="topright">
+      <span id="chapTag">บทนำ</span>
+      <button class="playbtn" id="ppBtn">▶ เล่นอัตโนมัติ</button>
+    </div>
+  </div>
+</div>
+
+<div class="raceyear" id="raceYearBox" hidden>
+  <span class="ry-lab">ปีงบประมาณ</span>
+  <span class="ry-val" id="raceYearVal">2558</span>
+  <span class="ry-note">ข้อมูลรายกระทรวงปีนี้ในไฟล์ต้นฉบับเสียหาย — ข้ามไป</span>
+</div>
+
+<div class="scrollcue" id="cue">เลื่อนลงเพื่อเริ่ม<span class="arrow"></span></div>
+<div class="grain"></div>
+<div class="runway" id="runway"></div>
+
+<script>
+(function(){
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var beats = Array.prototype.slice.call(document.querySelectorAll('.beat'));
+  var N = beats.length;
+  var runway = document.getElementById('runway');
+  var progressRow = document.getElementById('progressRow');
+  var chapTag = document.getElementById('chapTag');
+  var cue = document.getElementById('cue');
+  function $(id){ return document.getElementById(id); }
+  function fmt(n){ return Math.round(n).toLocaleString('en-US'); }
+
+  var frag = document.createDocumentFragment(), segs = [], spacers = [];
+  for(var i = 0; i < N; i++){
+    var sp = document.createElement('div');
+    sp.className = 'spacer'; sp.setAttribute('data-i', i);
+    spacers.push(sp); frag.appendChild(sp);
+    var s = document.createElement('div');
+    s.className = 'seg';
+    var bar = document.createElement('i');
+    s.appendChild(bar); progressRow.appendChild(s); segs.push(bar);
+  }
+  runway.appendChild(frag);
+
+  var stepH = 1, curIdx = -1;
+  function measure(){ stepH = Math.max(1, runway.scrollHeight / N); }
+
+  // A beat whose scene stacks money columns must use the top band; `center` would
+  // drop its text into the middle of the screen, on top of those columns. Enforced
+  // here rather than left to the markup, where it is one easy class to forget.
+  var COLUMN_SCENES = /^(total|prov|tambon|sso1|sso2|visits|share|race|clinic|fund)$/;
+  beats.forEach(function(b){
+    if(COLUMN_SCENES.test(b.getAttribute('data-scene') || '')) b.classList.remove('center');
+  });
+
+  /* ================= the money field =================
+     Every bar in this film is built out of the same particles. When the scene
+     changes they fly to new columns, so the money is visibly moved, not redrawn. */
+  var cv = $('money'), ctx = cv.getContext('2d'), dpr = 1, W = 0, H = 0;
+  var NP = 2200, P = [];
+  for(var n = 0; n < NP; n++){
+    P.push({x:Math.random(), y:Math.random(), tx:Math.random(), ty:-0.2, on:0, c:0,
+            vy:0.0016 + Math.random()*0.0026, sp:0.055 + Math.random()*0.06,
+            ph:Math.random() * 6.283, ang:0, rad:0, spin:0});
+  }
+  var mode = 'rain', bins = [], CELL = 0;
+
+  function sizeCanvas(){
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    W = cv.clientWidth; H = cv.clientHeight;
+    cv.width = Math.floor(W * dpr); cv.height = Math.floor(H * dpr);
+    if(bins.length){ planScene(); layoutBins(); }
+  }
+
+  // scene definitions: label / value / accent
+  var SCENES = {
+    total:  [['งบประมาณแผ่นดิน 2570', 3790000, 1]],
+    prov:   [['อบจ. สมุทรปราการ', 3100, 1], ['อบจ. เชียงใหม่', 2761, 0]],
+    tambon: [['เทศบาลนครเชียงใหม่', 1995, 0], ['อบต. ราชาเทวะ', 615, 1]],
+    // shown together on the second beat so the 9x gap between the two is visible,
+    // instead of two lone columns that would each scale to full height
+    sso1:   [['บัญชีไม่ตรงกัน', 382.7, 1]],
+    sso2:   [['บัญชีไม่ตรงกัน', 382.7, 0], ['ทรัพย์สินคลาดเคลื่อน', 3600, 1]],
+    visits: [['ก่อนคุมเข้ม', 614330, 0], ['หลังคุมเข้ม', 268123, 1]],
+    share:  [['2558', 14.6, 0, '%'], ['2568', 22.4, 1, '%']]
+  };
+  // millions round to whole units; a percentage or a one-decimal figure must not
+  // (14.6 was being drawn on the column as "15")
+  function valText(b){
+    var v = b.v;
+    return (v < 1000 ? String(Math.round(v * 10) / 10) : fmt(v)) + (b.suf || '');
+  }
+
+  /* Timeline scenes: columns whose values change while a year counter runs.
+     `sort` re-ranks the columns left→right every frame (a race); without it the
+     columns stay put and you watch each one rise or get cut. A `gapAfter` index
+     marks a year the source data cannot support — it is shown, not skipped silently. */
+  var TIMELINES = {
+    race: {
+      years:[2558,2559,2560,2561,2563,2564,2565,2566,2567,2568], dwell:400, step:1800, sort:true,
+      // FY2562's per-ministry rows are corrupted in the source workbook
+      // phrases, not a sentence: Thai has no spaces, so the browser may otherwise
+      // break inside a word (it split เสียหาย into เสีย / หาย)
+      gapAfter:3, gapYear:'2562', gapNote:['ข้อมูลรายกระทรวงปีนี้', 'ในไฟล์ต้นฉบับเสียหาย', '— ข้ามไป'],
+      series:[
+        ['งบกลาง',        [375708,455382,448880,420183,518771,614616,587409,590470,736943,842002], 1],
+        ['ศึกษาธิการ',    [501326,517077,513962,507948,367745,356450,330427,327375,328171,340775], 0],
+        ['มหาดไทย',       [340172,341821,335146,386179,352123,334488,315513,325246,351596,294413], 0],
+        ['การคลัง',       [185852,199174,217714,238247,249201,268440,273603,285155,327021,389660], 0],
+        ['กลาโหม',        [192949,206461,213544,220524,231745,214531,199937,194499,195744,199721], 0],
+        ['กองทุนหมุนเวียน',[136923,147875,183985,215236,204174,223025,195370,206819,257551,276485], 0],
+        ['คมนาคม',        [110723,136101,157390,168768,176095,189959,173164,180313,183280,193353], 0],
+        ['สาธารณสุข',     [109658,123542,131102,134894,137389,145802,153839,152264,165376,171966], 0]
+      ]
+    },
+    // each column is a year; it only exists once the counter reaches it
+    clinic: {
+      years:[2567,2568,2569], dwell:1600, step:2400, sort:false,
+      series:[
+        ['2567', [2062,2062,2062], 0],
+        ['2568', [0,6782,6782], 1],
+        ['2569', [0,0,4178], 0]
+      ]
+    },
+    // กองทุนอนุรักษ์พลังงาน, million baht, from the fund's own NBMS tables (validated to the satang).
+    // 2560 cash includes 27.2B then held as short/long-term investments; 2568 remittance is
+    // still pending Cabinet approval — said in the caption, not hidden.
+    fund: {
+      years:[2560,2561,2562,2563,2564,2565,2566,2567,2568], dwell:700, step:1500, sort:false,
+      series:[
+        ['เงินสดคงเหลือ',  [41200,32659,24072,22871,26112,26961,12987,14341,16483], 1],
+        ['ใช้จริงตามภารกิจ',[6458,5346,13208,5639,2852,1414,1945,1138,198], 0],
+        ['นำส่งคลัง',      [1558,10000,0,0,0,14378,0,0,2246], 0]
+      ]
+    }
+  };
+  var TL = null, tlT0 = 0, lastYearShown = '';
+  var yearBox = $('raceYearBox'), yearVal = $('raceYearVal'), yearNote = yearBox.querySelector('.ry-note');
+
+  function setScene(name){
+    if(name === 'calm') name = 'drift';
+    var isTL = !!TIMELINES[name];
+    if(name === mode && !isTL) return;
+    mode = name;
+    TL = isTL ? TIMELINES[name] : null;
+    yearBox.hidden = !isTL;
+    if(isTL){
+      tlT0 = performance.now();
+      lastYearShown = String(TL.years[0]);
+      yearVal.textContent = lastYearShown;      // correct from the first paint, not the first tick
+      yearBox.classList.remove('gap');
+      yearNote.textContent = '';
+      (TL.gapNote || []).forEach(function(phrase, k){
+        if(k) yearNote.appendChild(document.createTextNode(' '));
+        var sp = document.createElement('span');
+        sp.className = 'nb'; sp.textContent = phrase;
+        yearNote.appendChild(sp);
+      });
+      if(!TL.sort && !TL.fixedMax){
+        TL.fixedMax = Math.max.apply(null, TL.series.map(function(m){ return Math.max.apply(null, m[1]); }));
+      }
+      // src pins each column to its series: with `sort` the array is re-ordered every
+      // frame, so position can no longer be used to look its numbers up
+      bins = TL.series.map(function(m, idx){ return {label:m[0], v:m[1][0], hi:m[2], src:idx}; });
+      planScene(); layoutBins(); return;
+    }
+    if(SCENES[name]){
+      bins = SCENES[name].map(function(b){ return {label:b[0], v:b[1], hi:b[2], suf:b[3] || ''}; });
+      planScene(); layoutBins();
+      return;
+    }
+    bins = [];
+    if(name === 'swirl'){
+      // start each orbit from where the particle already is, so the stacks unwind
+      // into the swirl instead of teleporting
+      for(var n = 0; n < NP; n++){
+        var p = P[n], dx = p.x - 0.5, dy = p.y - 0.5;
+        p.rad = Math.max(0.06, Math.sqrt(dx*dx + dy*dy));
+        p.ang = Math.atan2(dy, dx);
+        p.spin = (0.0016 + 0.0026 / (p.rad + 0.25)) * (n % 7 ? 1 : 0.6);
+      }
+    }
+  }
+
+  // The axis a column is drawn against: one fixed axis for an unsorted timeline (so a
+  // pile that shrinks is seen to shrink); the current leader for a race.
+  function axisMax(){
+    if(TL && TL.fixedMax) return TL.fixedMax;
+    var m = 0; bins.forEach(function(b){ if(b.v > m) m = b.v; }); return m;
+  }
+  // The largest share of the axis this column will ever take in the scene.
+  function capRatio(b){
+    if(!TL){ var m = axisMax(); return m ? b.v / m : 0; }
+    var s = TL.series[b.src][1], r = 0;
+    for(var y = 0; y < s.length; y++){
+      var axis = TL.fixedMax;
+      if(!axis){ axis = 0; TL.series.forEach(function(q){ if(q[1][y] > axis) axis = q[1][y]; }); }
+      if(axis) r = Math.max(r, s[y] / axis);
+    }
+    return r;
+  }
+
+  /* Planned once per scene, never per frame: the cell size and, for every column,
+     a fixed pool of particles sized to the most it will ever hold. A column then
+     only switches its own top cells on and off as its value moves — nothing in a
+     neighbouring column is touched, so growth reads as stacking, not as a shimmer
+     running through the whole field. */
+  var PLAN = null, textBottomPx = 0;
+  function planScene(){
+    if(!bins.length || !W){ PLAN = null; return; }
+    var pad = W < 560 ? 0.045 : 0.07;
+    var span = W * (1 - 2 * pad);
+    var gap = Math.min(28, span * 0.045);
+    // a column is never wider than 30% of the screen (one lone column would otherwise
+    // span the whole width), and the group is centred in the space that leaves
+    var bw = Math.min((span - gap * (bins.length - 1)) / bins.length, W * 0.30);
+    var x0 = (W - (bw * bins.length + gap * (bins.length - 1))) / 2;
+    // Columns start below the real bottom of this beat's text, measured — a fixed
+    // band guessed wrong for any beat whose headline ran to a second line.
+    var ceiling = Math.max(H * 0.30, textBottomPx + (W < 560 ? 14 : 26));
+    var maxH = Math.max(H * 0.28, Math.min(H * (W < 560 ? 0.40 : 0.50), H * 0.90 - ceiling));
+    var cell = Math.max(3, Math.min(9, Math.round(W / 190))), cols, rows, need;
+    // coarsen the cell until every column's pool fits the particle budget
+    for(var guard = 0; guard < 60; guard++){
+      cols = Math.max(2, Math.floor(bw / cell));
+      rows = Math.floor(maxH / cell);
+      need = 0;
+      bins.forEach(function(b){ b.cap = Math.ceil(cols * rows * capRatio(b)); need += b.cap; });
+      if(need <= NP) break;
+      cell += 1;
+    }
+    if(need > NP){                       // last resort: never index past the particle array
+      var k = NP / need;
+      bins.forEach(function(b){ b.cap = Math.floor(b.cap * k); });
+    }
+    var used = 0;
+    bins.forEach(function(b){ b.i0 = used; used += b.cap; b.cols = cols; b.w = bw; });
+    for(var q = used; q < NP; q++) P[q].on = 0;
+    CELL = cell;
+    PLAN = {cols:cols, rows:rows, x0:x0, bw:bw, gap:gap, base:H * 0.90};
+  }
+
+  function layoutBins(){
+    if(!PLAN || !bins.length || !W) return;
+    var axis = axisMax();
+    bins.forEach(function(b, bi){
+      b.x = PLAN.x0 + bi * (PLAN.bw + PLAN.gap);
+      b.base = PLAN.base;
+      // a column whose year has not arrived yet holds no money at all
+      b.n = (b.v > 0 && axis) ? Math.min(b.cap, Math.max(1, Math.round(PLAN.cols * PLAN.rows * (b.v / axis)))) : 0;
+      for(var j = 0; j < b.cap; j++){
+        var p = P[b.i0 + j];
+        if(j < b.n){
+          var col = j % b.cols, row = Math.floor(j / b.cols);
+          p.tx = (b.x + col * CELL + CELL * 0.5) / W;
+          p.ty = (b.base - row * CELL - CELL * 0.5) / H;
+          p.on = 1; p.c = b.hi;
+        } else {
+          p.on = 0;
+        }
+      }
+    });
+  }
+
+  function tickTimeline(now){
+    var last = TL.years.length - 1;
+    // each year sits still for `dwell` ms, then moves to the next over `step` ms —
+    // a plateau per year reads far better than one continuous glide
+    var dwell = TL.dwell || 0, period = dwell + TL.step;
+    var elapsed = Math.max(0, now - tlT0);
+    var k = Math.floor(elapsed / period), within = elapsed - k * period;
+    var f = within < dwell ? 0 : (within - dwell) / TL.step;
+    var pos = Math.min(last, k + f);
+    var i = Math.floor(pos), j = Math.min(last, i + 1);
+    f = pos - i;
+    var e = f < 0.5 ? 2*f*f : 1 - Math.pow(-2*f + 2, 2)/2;
+    bins.forEach(function(b){
+      var s = TL.series[b.src][1];
+      b.v = s[i] + (s[j] - s[i]) * e;
+    });
+    var inGap = (TL.gapAfter !== undefined && i === TL.gapAfter && f > 0.08 && f < 0.92);
+    var year = inGap ? TL.gapYear : String(TL.years[f > 0.5 ? j : i]);
+    if(year !== lastYearShown){ lastYearShown = year; yearVal.textContent = year; }
+    yearBox.classList.toggle('gap', inGap);
+    // ranked left to right, so overtaking is something the money actually does
+    if(TL.sort) bins.sort(function(a, b){ return b.v - a.v; });
+    layoutBins();
+  }
+
+  function drawMoney(now){
+    if(!W) return;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    var dim = (mode === 'calm') ? 0.3 : 1;
+    var size = Math.max(2.5, CELL ? CELL - 1.2 : 3);
+
+    var T = now * 0.001;
+
+    if(mode === 'rain'){
+      ctx.fillStyle = 'rgba(240,180,41,0.5)';
+      for(var n = 0; n < NP; n++){
+        var p = P[n];
+        p.y += p.vy;
+        p.x += Math.sin(T * 0.6 + p.ph) * 0.0004;
+        if(p.y > 1.05){ p.y = -0.05; p.x = Math.random(); }
+        ctx.fillRect(p.x * W, p.y * H, 3, 4.5);
+      }
+      return;
+    }
+
+    // money suspended in air — used on statement beats so nothing is ever still
+    if(mode === 'drift'){
+      ctx.fillStyle = 'rgba(150,170,190,0.34)';
+      for(var n2 = 0; n2 < NP; n2++){
+        var q = P[n2];
+        q.x += Math.sin(T * 0.33 + q.ph) * 0.00042 + 0.00008;
+        q.y += Math.cos(T * 0.27 + q.ph * 1.4) * 0.00034 - 0.00012;
+        if(q.x > 1.04) q.x = -0.04; else if(q.x < -0.04) q.x = 1.04;
+        if(q.y > 1.04) q.y = -0.04; else if(q.y < -0.04) q.y = 1.04;
+        ctx.fillRect(q.x * W, q.y * H, 3, 3);
+      }
+      return;
+    }
+
+    // slow orbit — the signature of a chapter card
+    if(mode === 'swirl'){
+      var ar = H / Math.max(1, W);
+      for(var n3 = 0; n3 < NP; n3++){
+        var s = P[n3];
+        s.ang += s.spin;
+        s.x = 0.5 + Math.cos(s.ang) * s.rad / Math.max(ar, 0.35);
+        s.y = 0.5 + Math.sin(s.ang) * s.rad;
+        ctx.fillStyle = (n3 % 11) ? 'rgba(150,170,190,0.3)' : 'rgba(240,180,41,0.5)';
+        ctx.fillRect(s.x * W, s.y * H, 3, 3);
+      }
+      return;
+    }
+
+    // settle particles toward their assigned cells
+    var goldA = 'rgba(240,180,41,' + (0.85 * dim).toFixed(2) + ')';
+    var alertA = 'rgba(255,90,77,' + (0.92 * dim).toFixed(2) + ')';
+    var grayA = 'rgba(120,138,155,' + (0.62 * dim).toFixed(2) + ')';
+    for(var q = 0; q < 2; q++){
+      ctx.fillStyle = q ? alertA : grayA;
+      for(var m = 0; m < NP; m++){
+        var pp = P[m];
+        if(pp.c !== q) continue;
+        if(pp.on){
+          pp.x += (pp.tx - pp.x) * pp.sp;
+          pp.y += (pp.ty - pp.y) * pp.sp;
+          // a settled stack still breathes, so a held scene never reads as a frozen image
+          var sway = Math.sin(T * 1.15 + pp.ph) * 0.9;
+          var bob  = Math.cos(T * 0.85 + pp.ph * 1.7) * 0.7;
+          ctx.fillRect(pp.x * W - size/2 + sway, pp.y * H - size/2 + bob, size, size);
+        } else {
+          // money leaving the system drifts up and out
+          pp.y -= 0.004;
+          if(pp.y < -0.1){ pp.y = -0.1; continue; }
+          ctx.fillRect(pp.x * W - size/2, pp.y * H - size/2, size, size);
+        }
+      }
+    }
+
+    // column labels + values
+    ctx.textAlign = 'center';
+    bins.forEach(function(b){
+      var topY = b.base - (b.n / b.cols) * CELL;
+      var cx = b.x + b.w / 2;
+      // the numbers on the columns are the data itself, so they grow with the screen
+      var vFont = Math.round(Math.max(13, Math.min(30, W / 66)));
+      var lFont = Math.round(Math.max(11, Math.min(21, W / 90)));
+      if(b.n > 0){
+        ctx.fillStyle = 'rgba(' + (b.hi ? '255,90,77' : '190,205,218') + ',' + (0.95 * dim).toFixed(2) + ')';
+        ctx.font = '700 ' + vFont + 'px "JetBrains Mono", monospace';
+        ctx.fillText(valText(b), cx, topY - vFont * 0.8);
+      }
+      ctx.fillStyle = 'rgba(147,161,176,' + (0.9 * dim).toFixed(2) + ')';
+      ctx.font = lFont + 'px Sarabun, sans-serif';
+      ctx.fillText(b.label, cx, b.base + lFont * 1.6);
+    });
+  }
+
+  /* ---- DOM reveals that stay precise ---- */
+  function countTo(el, target, duration, decimals){
+    var write = function(v){ el.firstChild.nodeValue = (decimals ? v.toFixed(decimals) : fmt(v)) + ' '; };
+    if(reduced){ write(target); return; }
+    var start = performance.now();
+    (function tick(now){
+      var p = Math.min(1, (now - start) / duration);
+      write(target * (1 - Math.pow(1 - p, 3)));
+      if(p < 1) requestAnimationFrame(tick);
+    })(performance.now());
+  }
+
+  var chartBuilt = false;
+  function drawChart(){
+    if(!chartBuilt){
+      chartBuilt = true;
+      var data = [[2558,2.575],[2559,2.776],[2560,2.923],[2561,3.050],[2562,3.000],
+                  [2563,3.200],[2564,3.286],[2565,3.100],[2566,3.185],[2567,3.602],[2568,3.753]];
+      var CW=580, CH=176, padL=40, padR=34, padT=14, padB=24, maxY=4;
+      var X = function(i){ return padL + i*(CW-padL-padR)/(data.length-1); };
+      var Y = function(v){ return padT + (1 - v/maxY)*(CH-padT-padB); };
+      var axes = $('chartAxes'), NS = 'http://www.w3.org/2000/svg';
+      [0,1,2,3,4].forEach(function(v){
+        var ln = document.createElementNS(NS,'line');
+        ln.setAttribute('class','ax-line');
+        ln.setAttribute('x1',padL); ln.setAttribute('x2',CW-padR);
+        ln.setAttribute('y1',Y(v)); ln.setAttribute('y2',Y(v));
+        ln.setAttribute('opacity', v===0 ? '1' : '0.45');
+        axes.appendChild(ln);
+        var tx = document.createElementNS(NS,'text');
+        tx.setAttribute('class','ax-txt'); tx.setAttribute('x',padL-8);
+        tx.setAttribute('y',Y(v)+3); tx.setAttribute('text-anchor','end');
+        tx.textContent = v.toFixed(1); axes.appendChild(tx);
+      });
+      [0,5,10].forEach(function(i){
+        var tx = document.createElementNS(NS,'text');
+        tx.setAttribute('class','ax-txt'); tx.setAttribute('x',X(i)); tx.setAttribute('y',CH-6);
+        tx.setAttribute('text-anchor', i===0 ? 'start' : (i===10 ? 'end' : 'middle'));
+        tx.textContent = data[i][0]; axes.appendChild(tx);
+      });
+      var d = data.map(function(p,i){ return (i?'L':'M') + X(i).toFixed(1) + ' ' + Y(p[1]).toFixed(1); }).join(' ');
+      $('chartLine').setAttribute('d', d);
+      $('chartArea').setAttribute('d', d + ' L' + X(data.length-1).toFixed(1) + ' ' + Y(0).toFixed(1) +
+                                       ' L' + X(0).toFixed(1) + ' ' + Y(0).toFixed(1) + ' Z');
+      var ref = $('chartRef');
+      ref.setAttribute('x1',padL); ref.setAttribute('x2',CW-padR);
+      ref.setAttribute('y1',Y(data[0][1])); ref.setAttribute('y2',Y(data[0][1]));
+      $('chartDot').setAttribute('cx', X(10)); $('chartDot').setAttribute('cy', Y(3.753));
+      $('chartEndLbl').setAttribute('x', X(10)); $('chartEndLbl').setAttribute('y', Y(3.753) - 12);
+    }
+    var path = $('chartLine'), len = path.getTotalLength();
+    path.style.transition = 'none';
+    path.style.strokeDasharray = len + ' ' + len;
+    path.style.strokeDashoffset = reduced ? 0 : len;
+    // the year counter walks 2558 → 2568 in step with the line being drawn
+    // (skipped on phones, where the counter would sit on top of the chart)
+    if(W >= 560){
+      yearBox.hidden = false; yearBox.classList.remove('gap'); yearNote.textContent = '';
+      var yStart = performance.now() + 220, ySpan = 1700;
+      (function tickYear(now){
+        if(curIdx !== 4 || TL) return;             // 4 = this chart beat
+        var p = reduced ? 1 : Math.max(0, Math.min(1, (now - yStart) / ySpan));
+        var yr = String(2558 + Math.round(p * 10));
+        if(yr !== lastYearShown){ lastYearShown = yr; yearVal.textContent = yr; }
+        if(p < 1) requestAnimationFrame(tickYear);
+      })(performance.now());
+    }
+    if(reduced) return;
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        path.style.transition = 'stroke-dashoffset 1700ms cubic-bezier(.3,.6,.3,1) 220ms';
+        path.style.strokeDashoffset = '0';
+      });
+    });
+  }
+
+  var LO = 189, HI = 206, bidBuilt = false;
+  function bidPct(v){ return ((v - LO) / (HI - LO) * 100) + '%'; }
+  function buildBidLine(){
+    var host = $('numLine');
+    if(!bidBuilt){
+      bidBuilt = true;
+      [190,195,200,205].forEach(function(v){
+        var tk = document.createElement('div');
+        tk.className = 'nl-tick'; tk.style.left = bidPct(v);
+        var lb = document.createElement('div');
+        lb.className = 'nl-tlab'; lb.style.left = bidPct(v); lb.textContent = v;
+        host.appendChild(tk); host.appendChild(lb);
+      });
+      $('nlRef').style.left = bidPct(195.6);
+      $('nlRefLab').style.left = bidPct(195.6);
+      [[1,195.6],[2,198],[3,204]].forEach(function(p){
+        $('nlDot' + p[0]).style.left = bidPct(p[1]);
+        $('nlLab' + p[0]).style.left = bidPct(p[1]);
+      });
+    }
+    [[3,700],[2,1250],[1,2000]].forEach(function(p){
+      var dot = $('nlDot' + p[0]), lab = $('nlLab' + p[0]);
+      dot.style.transition = 'none'; dot.style.transform = 'scale(0)';
+      dot.classList.remove('snap'); lab.style.opacity = '0';
+      if(reduced){ dot.style.transform = 'scale(1)'; lab.style.opacity = '1'; return; }
+      setTimeout(function(){
+        dot.style.transition = ''; dot.style.transform = 'scale(1)'; lab.style.opacity = '1';
+        if(p[0] === 1) setTimeout(function(){ dot.classList.add('snap'); }, 420);
+      }, p[1]);
+    });
+  }
+
+  var onEnter = {
+    3:  function(){ countTo($('nBudget'), 3.79, 1700, 2); },
+    4:  drawChart,
+    10: function(){ countTo($('nSso1'), 382.7, 1400, 1); },
+    11: function(){ countTo($('nSso2'), 3600, 1500, 0); },
+    21: buildBidLine
+  };
+
+  /* ---- timeline ---- */
+  var lastOp = new Array(N).fill(-1);
+  function setOp(k, op){
+    if(op === lastOp[k]) return;
+    beats[k].style.opacity = op;
+    beats[k].style.visibility = op > 0.01 ? 'visible' : 'hidden';
+    lastOp[k] = op;
+  }
+  function applyIndex(i){
+    if(i === curIdx) return;
+    if(curIdx >= 0) beats[curIdx].classList.remove('on');
+    curIdx = i;
+    beats[i].classList.add('on');
+    var c = beats[i].getAttribute('data-chap');
+    chapTag.textContent = (c && c !== '0') ? ('บทที่ ' + c + '/6') : 'บทนำ';
+    // measured before the scene is planned, so the columns can clear this beat's text
+    textBottomPx = beats[i].classList.contains('center') ? 0 : beats[i].getBoundingClientRect().bottom;
+    setScene(beats[i].getAttribute('data-scene') || 'calm');
+    if(onEnter[i]) onEnter[i]();
+  }
+  function render(){
+    var t = (window.scrollY || document.documentElement.scrollTop || 0) / stepH;
+    var i = Math.max(0, Math.min(N - 1, Math.round(t)));
+    for(var k = 0; k < N; k++){
+      var d = Math.abs(t - k), op;
+      if(d >= 0.58) op = 0; else if(d <= 0.24) op = 1; else op = 1 - (d - 0.24) / 0.34;
+      setOp(k, op);
+      segs[k].style.transform = 'scaleX(' + Math.max(0, Math.min(1, t - k + 1)).toFixed(3) + ')';
+    }
+    applyIndex(i);
+    cue.style.opacity = t > 0.3 ? '0' : '';
+  }
+
+  if(window.IntersectionObserver){
+    var io = new IntersectionObserver(function(entries){
+      for(var n = 0; n < entries.length; n++){
+        if(!entries[n].isIntersecting) continue;
+        var i = +entries[n].target.getAttribute('data-i');
+        for(var k = 0; k < N; k++){
+          setOp(k, k === i ? 1 : 0);
+          segs[k].style.transform = 'scaleX(' + (k < i ? 1 : 0) + ')';
+        }
+        applyIndex(i);
+      }
+    }, {threshold: 0.55});
+    spacers.forEach(function(sp){ io.observe(sp); });
+  }
+
+  var lastY = -1, lastVH = 0;
+  function sync(){
+    // some embedders resize the viewport without firing `resize`; a stale step height
+    // would put every beat one slot off, so the viewport height is checked here too
+    if(window.innerHeight !== lastVH){ lastVH = window.innerHeight; measure(); sizeCanvas(); lastY = -1; }
+    var y = window.scrollY || document.documentElement.scrollTop || 0;
+    if(y !== lastY){ lastY = y; render(); }
+  }
+  window.addEventListener('scroll', sync, {passive:true});
+  window.addEventListener('resize', function(){ measure(); sizeCanvas(); lastY = -1; sync(); });
+
+  // one loop drives the money field and picks up scroll wherever events are throttled
+  function frame(now){
+    sync();
+    if(TL) tickTimeline(now);
+    drawMoney(now);
+    requestAnimationFrame(frame);
+  }
+
+  /* ---- autoplay ---- */
+  var auto = false, autoRaf = null, phase = 'hold', phaseAt = 0, y0 = 0, y1 = 0, holdMs = 4500, MOVE = 1100;
+  var ppBtn = $('ppBtn');
+  function beginHold(){
+    phase = 'hold'; phaseAt = performance.now();
+    holdMs = parseInt(beats[Math.max(0, curIdx)].getAttribute('data-duration'), 10) || 4500;
+  }
+  function beginMove(){
+    phase = 'move'; phaseAt = performance.now();
+    y0 = window.scrollY;
+    var next = Math.max(0, curIdx) + 1;
+    y1 = (next >= N) ? 0 : next * stepH;
+  }
+  function autoTick(now){
+    if(!auto) return;
+    if(phase === 'hold'){ if(now - phaseAt >= holdMs) beginMove(); }
+    else {
+      var p = Math.min(1, (now - phaseAt) / MOVE);
+      var e = p < 0.5 ? 2*p*p : 1 - Math.pow(-2*p + 2, 2)/2;
+      window.scrollTo(0, y0 + (y1 - y0) * e);
+      if(p >= 1) beginHold();
+    }
+    autoRaf = requestAnimationFrame(autoTick);
+  }
+  function setAuto(on){
+    auto = on;
+    ppBtn.textContent = on ? '❚❚ หยุด' : '▶ เล่นอัตโนมัติ';
+    ppBtn.classList.toggle('on', on);
+    document.documentElement.style.scrollSnapType = on ? 'none' : '';
+    cancelAnimationFrame(autoRaf);
+    if(on){ beginHold(); autoRaf = requestAnimationFrame(autoTick); }
+  }
+  ppBtn.addEventListener('click', function(){ setAuto(!auto); });
+  ['wheel','touchstart'].forEach(function(ev){
+    window.addEventListener(ev, function(){ if(auto) setAuto(false); }, {passive:true});
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.code === 'Space'){ e.preventDefault(); setAuto(!auto); return; }
+    var dir = (e.key === 'ArrowRight' || e.key === 'ArrowDown') ? 1
+            : (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   ? -1 : 0;
+    if(dir){
+      e.preventDefault();
+      if(auto) setAuto(false);
+      window.scrollTo({top: Math.max(0, curIdx + dir) * stepH, behavior:'smooth'});
+    }
+  });
+  document.addEventListener('visibilitychange', function(){ if(document.hidden && auto) setAuto(false); });
+
+  setTimeout(function(){ cue.style.opacity = '0'; }, 4200);
+  measure(); sizeCanvas(); render();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

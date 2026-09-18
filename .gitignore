@@ -1,0 +1,14 @@
+# Source documents: ~3.2 GB of budget PDFs/XLSX extracted from the original archives.
+# They are the input to the analysis, not part of the site, and far exceed GitHub limits.
+extracted/
+
+# Working copies of the same page. The canonical, deployable file is ./index.html —
+# keeping duplicates in the repo only invites them to drift apart.
+deploy/
+site/
+.claude/
+
+# Editor / OS noise
+.DS_Store
+Thumbs.db
+*.bak
