@@ -930,19 +930,8 @@
     path.style.transition = 'none';
     path.style.strokeDasharray = len + ' ' + len;
     path.style.strokeDashoffset = reduced ? 0 : len;
-    // the year counter walks 2558 → 2568 in step with the line being drawn
-    // (skipped on phones, where the counter would sit on top of the chart)
-    if(W >= 560){
-      yearBox.hidden = false; yearBox.classList.remove('gap'); yearNote.textContent = '';
-      var yStart = performance.now() + 220, ySpan = 1700;
-      (function tickYear(now){
-        if(curIdx !== 4 || TL) return;             // 4 = this chart beat
-        var p = reduced ? 1 : Math.max(0, Math.min(1, (now - yStart) / ySpan));
-        var yr = String(2558 + Math.round(p * 10));
-        if(yr !== lastYearShown){ lastYearShown = yr; yearVal.textContent = yr; }
-        if(p < 1) requestAnimationFrame(tickYear);
-      })(performance.now());
-    }
+    // No year counter on this beat: the chart carries its own year axis, and the
+    // floating counter landed on top of the end-point label.
     if(reduced) return;
     requestAnimationFrame(function(){
       requestAnimationFrame(function(){
