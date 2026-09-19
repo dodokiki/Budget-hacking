@@ -615,6 +615,42 @@
     var i = x | 0, f = x - i, a = stops[i], b = stops[i + 1] || stops[i];
     return [(a[0] + (b[0] - a[0]) * f) | 0, (a[1] + (b[1] - a[1]) * f) | 0, (a[2] + (b[2] - a[2]) * f) | 0];
   }
+  /* Saturn-style rings: flattened ellipses on a tilted plane. The far half is drawn
+     before the particles and the near half after, so the band passes behind the title
+     and then in front of it. The dashes stream to show the rotation. */
+  var RING_TILT = -0.17, RING_FLAT = 0.3;
+  var RC = Math.cos(RING_TILT), RS = Math.sin(RING_TILT);
+  var RINGS = [[0.30, 2.2, 0.16], [0.355, 1.1, 0.10], [0.40, 2.6, 0.15],
+               [0.495, 1.3, 0.10], [0.55, 2.0, 0.13]];
+  function drawRings(cx, cy, fade, T, near){
+    if(fade <= 0) return;
+    var base = Math.min(W, H);
+    for(var i = 0; i < RINGS.length; i++){
+      var rx = base * RINGS[i][0], ry = rx * RING_FLAT;
+      var col = paletteAt(i / (RINGS.length - 1));
+      ctx.lineWidth = RINGS[i][1];
+      ctx.strokeStyle = 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',' + (RINGS[i][2] * fade).toFixed(3) + ')';
+      ctx.setLineDash([10 + i * 5, 14 + i * 4]);
+      ctx.lineDashOffset = -T * (26 + i * 13) * (i % 2 ? -1 : 1);
+      ctx.beginPath();
+      // 0..PI sweeps the near side of the ellipse, PI..2PI the far side
+      ctx.ellipse(cx, cy, rx, ry, RING_TILT, near ? 0 : Math.PI, near ? Math.PI : Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+    ctx.lineDashOffset = 0;
+  }
+
+  /* The film keeps the opening's spectrum but splits it by meaning: context columns
+     run through the cool end, and warm stays reserved for the column being called out,
+     so colour still says which one to look at. */
+  function coolAt(t){
+    var stops = [[96,120,146],[104,110,186],[64,150,190],[47,211,181]];
+    var x = Math.max(0, Math.min(0.9999, t)) * (stops.length - 1);
+    var i = x | 0, f = x - i, a = stops[i], b = stops[i + 1] || stops[i];
+    return [(a[0] + (b[0] - a[0]) * f) | 0, (a[1] + (b[1] - a[1]) * f) | 0, (a[2] + (b[2] - a[2]) * f) | 0];
+  }
+
   function tintParticles(T){
     for(var i = 0; i < NP; i++){
       var c = paletteAt(T && i < T.pts.length ? T.pts[i][0] : Math.random());
@@ -951,32 +987,18 @@
         // Trails: the previous frame is faded rather than cleared. While the money is
         // moving the fade is gentle, so each particle draws a streak; once the title is
         // assembled it goes hard, or the residue would smear the letters into a haze.
-        var settled = e > HOLD_AT && e < DROP_AT;
+        // `calm` ramps instead of switching: flipping the trail fade and the particle
+        // brightness in a single frame read as a blink
+        var calm = Math.max(0, Math.min(1, (e - HOLD_AT) / 600)) *
+                   (1 - Math.max(0, Math.min(1, (e - DROP_AT) / 260)));
         ctx.globalCompositeOperation = 'source-over';
-        ctx.fillStyle = 'rgba(7,9,13,' + (settled ? 0.72 : 0.44) + ')';
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = 'rgba(7,9,13,' + (0.44 + 0.28 * calm).toFixed(3) + ')';
         ctx.fillRect(0, 0, W, H);
 
-        // Rotating rings behind everything: four radii, alternating direction, drawn as
-        // arc segments so the motion is legible. Twelve strokes a frame.
-        if(TT || e > 300){
-          var rcx = (TT ? TT.cx : 0.5) * W, rcy = (TT ? TT.cy : 0.5) * H;
-          var fade = e > DROP_AT ? Math.max(0, 1 - (e - DROP_AT) / 700) : Math.min(1, (e - 300) / 900);
-          if(fade > 0){
-            ctx.lineWidth = 1.3;
-            for(var ri = 0; ri < 4; ri++){
-              var rr = Math.min(W, H) * (0.2 + ri * 0.13);
-              var spin = T * (0.13 + ri * 0.08) * (ri % 2 ? -1 : 1);
-              var rc = paletteAt(ri / 3);
-              ctx.strokeStyle = 'rgba(' + rc[0] + ',' + rc[1] + ',' + rc[2] + ',' + (0.13 * fade).toFixed(3) + ')';
-              for(var sg = 0; sg < 3; sg++){
-                var a0 = spin + sg * 2.094;
-                ctx.beginPath();
-                ctx.arc(rcx, rcy, rr, a0, a0 + 1.3);
-                ctx.stroke();
-              }
-            }
-          }
-        }
+        var rcx = (TT ? TT.cx : 0.5) * W, rcy = (TT ? TT.cy : 0.5) * H;
+        var ringFade = e > DROP_AT ? Math.max(0, 1 - (e - DROP_AT) / 700) : Math.min(1, (e - 300) / 900);
+        drawRings(rcx, rcy, ringFade, T, false);       // far half, behind the title
 
         // glow behind the assembled title
         if(TT && e > HOLD_AT - 500){
@@ -1015,6 +1037,7 @@
           if(TT && e >= DROP_AT){
             s.bvy += 0.00042;                              // gravity takes the pieces back down
             s.x += s.bvx; s.y += s.bvy;
+            ctx.globalAlpha = 1;
             ctx.fillStyle = s.cBright;
             ctx.fillRect(s.x * W, s.y * H, sz, sz * 1.5);
           } else if(pts && q < pts.length && e > FORM_AT + pts[q][0] * SWEEP){
@@ -1022,24 +1045,30 @@
             var sp = e < HOLD_AT ? 0.075 : 0.18;
             s.x += (pts[q][0] - s.x) * sp;
             s.y += (pts[q][1] - s.y) * sp;
+            ctx.globalAlpha = 1;
             ctx.fillStyle = s.cBright;
             ctx.fillRect(s.x * W - sz / 2, s.y * H - sz / 2, sz, sz);
           } else if(TT && e > FORM_AT && s.ospin){
-            // orbits the word instead of falling past it
+            // rides the same tilted, flattened plane as the rings, like ring debris
             s.oa += s.ospin;
-            s.x = TT.cx + Math.cos(s.oa) * s.orad * (H / W);
-            s.y = TT.cy + Math.sin(s.oa) * s.orad;
-            ctx.fillStyle = settled ? s.cFall : s.cBright;
+            var ox = Math.cos(s.oa) * s.orad, oy = Math.sin(s.oa) * s.orad * RING_FLAT;
+            s.x = TT.cx + (ox * RC - oy * RS) * (H / W);
+            s.y = TT.cy + (ox * RS + oy * RC);
+            ctx.globalAlpha = 1 - 0.5 * calm;
+            ctx.fillStyle = s.cBright;
             ctx.fillRect(s.x * W, s.y * H, sz * 0.8, sz * 0.8);
           } else {
             s.y += s.vy * (e < FORM_AT ? 3.4 : 1.8);
             if(s.y > 1.05){ s.y = -0.05; s.x = Math.random(); }
-            // leftover particles step back once the title is up, so they do not
+            // leftover particles step back as the title settles, so they do not
             // speckle across the letters
-            ctx.fillStyle = settled ? s.cFaint : s.cFall;
-            ctx.fillRect(s.x * W, s.y * H, 2.6, settled ? 4 : 7);
+            ctx.globalAlpha = 1 - 0.72 * calm;
+            ctx.fillStyle = s.cFall;
+            ctx.fillRect(s.x * W, s.y * H, 2.6, 7 - 3 * calm);
           }
         }
+        ctx.globalAlpha = 1;                           // never leak into the film's drawing
+        drawRings(rcx, rcy, ringFade, T, true);        // near half, across the front
         return;
       }
     }
@@ -1061,6 +1090,7 @@
 
     // money suspended in air — used on statement beats so nothing is ever still
     if(mode === 'drift'){
+      drawRings(W * 0.5, H * 0.52, 0.4, T, false);   // the rings stay present, just faint
       ctx.fillStyle = 'rgba(150,170,190,0.34)';
       for(var n2 = 0; n2 < NP; n2++){
         var q = P[n2];
@@ -1073,43 +1103,49 @@
       return;
     }
 
-    // slow orbit — the signature of a chapter card
+    // A chapter card carries the opening's signature: the same tilted rings, with the
+    // money riding them as debris rather than swarming in a sphere.
     if(mode === 'swirl'){
-      var ar = H / Math.max(1, W);
+      drawRings(W * 0.5, H * 0.5, 0.75, T, false);
       for(var n3 = 0; n3 < NP; n3++){
         var s = P[n3];
         s.ang += s.spin;
-        s.x = 0.5 + Math.cos(s.ang) * s.rad / Math.max(ar, 0.35);
-        s.y = 0.5 + Math.sin(s.ang) * s.rad;
-        ctx.fillStyle = (n3 % 11) ? 'rgba(150,170,190,0.3)' : 'rgba(240,180,41,0.5)';
+        var ox = Math.cos(s.ang) * s.rad, oy = Math.sin(s.ang) * s.rad * RING_FLAT;
+        s.x = 0.5 + (ox * RC - oy * RS) * (H / W);
+        s.y = 0.5 + (ox * RS + oy * RC);
+        var cc = (n3 % 13) ? coolAt((n3 % 97) / 96) : [240, 180, 41];
+        ctx.fillStyle = 'rgba(' + cc[0] + ',' + cc[1] + ',' + cc[2] + ',' + ((n3 % 13) ? 0.34 : 0.55) + ')';
         ctx.fillRect(s.x * W, s.y * H, 3, 3);
       }
+      drawRings(W * 0.5, H * 0.5, 0.75, T, true);
       return;
     }
 
-    // settle particles toward their assigned cells
-    var goldA = 'rgba(240,180,41,' + (0.85 * dim).toFixed(2) + ')';
-    var alertA = 'rgba(255,90,77,' + (0.92 * dim).toFixed(2) + ')';
+    // Columns are drawn one at a time so each can carry its own colour, walking the
+    // cool end of the opening's spectrum; a flagged column keeps the warm alert red.
     var grayA = 'rgba(120,138,155,' + (0.62 * dim).toFixed(2) + ')';
-    for(var q = 0; q < 2; q++){
-      ctx.fillStyle = q ? alertA : grayA;
-      for(var m = 0; m < NP; m++){
-        var pp = P[m];
-        if(pp.c !== q) continue;
-        if(pp.on){
-          pp.x += (pp.tx - pp.x) * pp.sp;
-          pp.y += (pp.ty - pp.y) * pp.sp;
-          // a settled stack still breathes, so a held scene never reads as a frozen image
-          var sway = Math.sin(T * 1.15 + pp.ph) * 0.9;
-          var bob  = Math.cos(T * 0.85 + pp.ph * 1.7) * 0.7;
-          ctx.fillRect(pp.x * W - size/2 + sway, pp.y * H - size/2 + bob, size, size);
-        } else {
-          // money leaving the system drifts up and out
-          pp.y -= 0.004;
-          if(pp.y < -0.1){ pp.y = -0.1; continue; }
-          ctx.fillRect(pp.x * W - size/2, pp.y * H - size/2, size, size);
-        }
+    bins.forEach(function(b, bi){
+      var c = b.hi ? [255, 90, 77] : coolAt(bins.length > 1 ? bi / (bins.length - 1) : 0.4);
+      ctx.fillStyle = 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + ((b.hi ? 0.92 : 0.74) * dim).toFixed(2) + ')';
+      for(var j = 0; j < b.cap; j++){
+        var pp = P[b.i0 + j];
+        if(!pp.on) continue;
+        pp.x += (pp.tx - pp.x) * pp.sp;
+        pp.y += (pp.ty - pp.y) * pp.sp;
+        // a settled stack still breathes, so a held scene never reads as a frozen image
+        var sway = Math.sin(T * 1.15 + pp.ph) * 0.9;
+        var bob  = Math.cos(T * 0.85 + pp.ph * 1.7) * 0.7;
+        ctx.fillRect(pp.x * W - size / 2 + sway, pp.y * H - size / 2 + bob, size, size);
       }
+    });
+    // money released from a column drifts up and out of the frame
+    ctx.fillStyle = grayA;
+    for(var m = 0; m < NP; m++){
+      var po = P[m];
+      if(po.on) continue;
+      po.y -= 0.004;
+      if(po.y < -0.1){ po.y = -0.1; continue; }
+      ctx.fillRect(po.x * W - size / 2, po.y * H - size / 2, size, size);
     }
 
     // column labels + values
