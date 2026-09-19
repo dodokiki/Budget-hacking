@@ -591,7 +591,7 @@
      Every bar in this film is built out of the same particles. When the scene
      changes they fly to new columns, so the money is visibly moved, not redrawn. */
   var cv = $('money'), ctx = cv.getContext('2d'), dpr = 1, W = 0, H = 0;
-  var NP = 2200, P = [];
+  var NP = 3200, P = [];
   for(var n = 0; n < NP; n++){
     P.push({x:Math.random(), y:Math.random(), tx:Math.random(), ty:-0.2, on:0, c:0,
             vy:0.0016 + Math.random()*0.0026, sp:0.055 + Math.random()*0.06,
@@ -682,15 +682,17 @@
     g.fillText(text, W / 2, H * 0.5);
     // start finer on small screens, or a phone-sized title would be sampled too sparsely
     var d = g.getImageData(0, 0, W, H).data, pts, step = Math.max(2, Math.round(W / 480));
-    // coarsen the sample until the glyphs need no more particles than we have
-    for(var k = 0; k < 8; k++){
+    // The title may claim only part of the field — the rest has to stay free to fill
+    // the orbiting disc, which looks thin if the letters take everything.
+    var budget = Math.round(NP * 0.55);
+    for(var k = 0; k < 10; k++){
       pts = [];
       for(var y = 0; y < H; y += step){
         for(var x = 0; x < W; x += step){
           if(d[(y * W + x) * 4 + 3] > 130) pts.push([x / W, y / H]);
         }
       }
-      if(pts.length <= NP) break;
+      if(pts.length <= budget) break;
       step += 1;
     }
     for(var i = pts.length - 1; i > 0; i--){       // shuffle so glyphs fill in evenly
@@ -975,11 +977,12 @@
           if(introTitle){
             tintParticles(introTitle);                // re-tint by where each is headed
             // the particles with no letter to land on are put into orbit around the word
+            // spread across a wide disc, the way a chapter card's field reads
             for(var o = introTitle.pts.length; o < NP; o++){
               var po = P[o];
               po.oa = Math.random() * 6.283;
-              po.orad = 0.2 + Math.random() * 0.36;
-              po.ospin = (0.0028 + Math.random() * 0.005) * (o % 2 ? 1 : -1);
+              po.orad = 0.2 + Math.pow(Math.random(), 0.7) * 0.58;
+              po.ospin = (0.0022 + Math.random() * 0.0055) * (o % 2 ? 1 : -1);
             }
           }
         }
@@ -1055,9 +1058,12 @@
             var ox = Math.cos(s.oa) * s.orad, oy = Math.sin(s.oa) * s.orad * RING_FLAT;
             s.x = TT.cx + (ox * RC - oy * RS) * (H / W);
             s.y = TT.cy + (ox * RS + oy * RC);
-            ctx.globalAlpha = 1 - 0.5 * calm;
+            // the disc thins out along the title's own band, the way a planet's shadow
+            // falls across its rings — this is what keeps the letters readable
+            var clear = Math.min(1, Math.abs(s.y - TT.cy) / (TT.h * 1.15));
+            ctx.globalAlpha = (1 - 0.3 * calm) * (0.2 + 0.8 * clear);
             ctx.fillStyle = s.cBright;
-            ctx.fillRect(s.x * W, s.y * H, sz * 0.8, sz * 0.8);
+            ctx.fillRect(s.x * W, s.y * H, 2.6, 2.6);
           } else {
             s.y += s.vy * (e < FORM_AT ? 3.4 : 1.8);
             if(s.y > 1.05){ s.y = -0.05; s.x = Math.random(); }
