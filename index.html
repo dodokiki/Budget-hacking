@@ -625,7 +625,7 @@
     }
   }
   tintParticles(null);                               // colourful from the first frame
-  var FORM_AT = 800, HOLD_AT = 2700, DROP_AT = 4200, INTRO_END = 5100;
+  var FORM_AT = 800, HOLD_AT = 2700, DROP_AT = 6400, INTRO_END = 7400;
   var SWEEP = 620;                                   // left-to-right assembly delay
 
   function sampleTitle(){
@@ -935,7 +935,16 @@
       else {
         if(introTitle === null && e > 250){
           introTitle = sampleTitle() || false;
-          if(introTitle) tintParticles(introTitle);   // re-tint by where each is headed
+          if(introTitle){
+            tintParticles(introTitle);                // re-tint by where each is headed
+            // the particles with no letter to land on are put into orbit around the word
+            for(var o = introTitle.pts.length; o < NP; o++){
+              var po = P[o];
+              po.oa = Math.random() * 6.283;
+              po.orad = 0.2 + Math.random() * 0.36;
+              po.ospin = (0.0028 + Math.random() * 0.005) * (o % 2 ? 1 : -1);
+            }
+          }
         }
         var TT = introTitle, pts = TT ? TT.pts : null;
 
@@ -946,6 +955,28 @@
         ctx.globalCompositeOperation = 'source-over';
         ctx.fillStyle = 'rgba(7,9,13,' + (settled ? 0.72 : 0.44) + ')';
         ctx.fillRect(0, 0, W, H);
+
+        // Rotating rings behind everything: four radii, alternating direction, drawn as
+        // arc segments so the motion is legible. Twelve strokes a frame.
+        if(TT || e > 300){
+          var rcx = (TT ? TT.cx : 0.5) * W, rcy = (TT ? TT.cy : 0.5) * H;
+          var fade = e > DROP_AT ? Math.max(0, 1 - (e - DROP_AT) / 700) : Math.min(1, (e - 300) / 900);
+          if(fade > 0){
+            ctx.lineWidth = 1.3;
+            for(var ri = 0; ri < 4; ri++){
+              var rr = Math.min(W, H) * (0.2 + ri * 0.13);
+              var spin = T * (0.13 + ri * 0.08) * (ri % 2 ? -1 : 1);
+              var rc = paletteAt(ri / 3);
+              ctx.strokeStyle = 'rgba(' + rc[0] + ',' + rc[1] + ',' + rc[2] + ',' + (0.13 * fade).toFixed(3) + ')';
+              for(var sg = 0; sg < 3; sg++){
+                var a0 = spin + sg * 2.094;
+                ctx.beginPath();
+                ctx.arc(rcx, rcy, rr, a0, a0 + 1.3);
+                ctx.stroke();
+              }
+            }
+          }
+        }
 
         // glow behind the assembled title
         if(TT && e > HOLD_AT - 500){
@@ -993,6 +1024,13 @@
             s.y += (pts[q][1] - s.y) * sp;
             ctx.fillStyle = s.cBright;
             ctx.fillRect(s.x * W - sz / 2, s.y * H - sz / 2, sz, sz);
+          } else if(TT && e > FORM_AT && s.ospin){
+            // orbits the word instead of falling past it
+            s.oa += s.ospin;
+            s.x = TT.cx + Math.cos(s.oa) * s.orad * (H / W);
+            s.y = TT.cy + Math.sin(s.oa) * s.orad;
+            ctx.fillStyle = settled ? s.cFall : s.cBright;
+            ctx.fillRect(s.x * W, s.y * H, sz * 0.8, sz * 0.8);
           } else {
             s.y += s.vy * (e < FORM_AT ? 3.4 : 1.8);
             if(s.y > 1.05){ s.y = -0.05; s.x = Math.random(); }
