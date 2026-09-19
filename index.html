@@ -37,10 +37,19 @@
     position:fixed;right:5%;top:25%;z-index:3;text-align:right;pointer-events:none;
   }
   .ry-lab{display:block;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.12em;color:var(--muted);margin-bottom:2px;}
-  .ry-val{
-    display:block;font-family:'JetBrains Mono',monospace;font-weight:700;
+  /* The year rolls over like a meter: the outgoing year is left behind as a ghost
+     that rises and fades while the new one rises into its place. */
+  .ry-wrap{position:relative;display:block;}
+  .ry-val,.ry-ghost{
+    font-family:'JetBrains Mono',monospace;font-weight:700;
     font-size:clamp(52px,11vw,108px);line-height:1;letter-spacing:-.02em;color:var(--gold);
   }
+  .ry-val{display:block;}
+  .ry-val.roll{animation:yrIn .5s cubic-bezier(.2,.8,.2,1) both;}
+  .ry-ghost{position:absolute;right:0;top:0;white-space:nowrap;pointer-events:none;animation:yrOut .5s cubic-bezier(.2,.8,.2,1) both;}
+  @keyframes yrIn{from{transform:translateY(.34em);opacity:0;}to{transform:translateY(0);opacity:1;}}
+  @keyframes yrOut{from{transform:translateY(0);opacity:.9;}to{transform:translateY(-.34em);opacity:0;}}
+  .raceyear.gap .ry-ghost{color:var(--gold);}
   .raceyear.gap .ry-val{color:var(--alert);}
   .ry-note{
     display:block;font-size:12.5px;color:var(--alert);margin-top:8px;max-width:270px;
@@ -529,7 +538,7 @@
 
 <div class="raceyear" id="raceYearBox" hidden>
   <span class="ry-lab">ปีงบประมาณ</span>
-  <span class="ry-val" id="raceYearVal">2558</span>
+  <span class="ry-wrap"><span class="ry-val" id="raceYearVal">2558</span></span>
   <span class="ry-note">ข้อมูลรายกระทรวงปีนี้ในไฟล์ต้นฉบับเสียหาย — ข้ามไป</span>
 </div>
 
@@ -657,6 +666,24 @@
   };
   var TL = null, tlT0 = 0, lastYearShown = '';
   var yearBox = $('raceYearBox'), yearVal = $('raceYearVal'), yearNote = yearBox.querySelector('.ry-note');
+  var yearWrap = yearBox.querySelector('.ry-wrap');
+
+  function setYear(y, roll){
+    if(y === lastYearShown) return;
+    if(roll && !reduced && lastYearShown){
+      var ghost = document.createElement('span');
+      ghost.className = 'ry-ghost';
+      ghost.textContent = lastYearShown;
+      ghost.style.color = getComputedStyle(yearVal).color;   // keep the colour it had
+      yearWrap.appendChild(ghost);
+      setTimeout(function(){ ghost.remove(); }, 520);
+      yearVal.classList.remove('roll');
+      void yearVal.offsetWidth;                              // restart the animation
+      yearVal.classList.add('roll');
+    }
+    lastYearShown = y;
+    yearVal.textContent = y;
+  }
 
   function setScene(name){
     if(name === 'calm') name = 'drift';
@@ -667,8 +694,8 @@
     yearBox.hidden = !isTL;
     if(isTL){
       tlT0 = performance.now();
-      lastYearShown = String(TL.years[0]);
-      yearVal.textContent = lastYearShown;      // correct from the first paint, not the first tick
+      lastYearShown = '';
+      setYear(String(TL.years[0]), false);      // correct from the first paint, no roll on entry
       yearBox.classList.remove('gap');
       yearNote.textContent = '';
       (TL.gapNote || []).forEach(function(phrase, k){
@@ -801,7 +828,7 @@
     });
     var inGap = (TL.gapAfter !== undefined && i === TL.gapAfter && f > 0.08 && f < 0.92);
     var year = inGap ? TL.gapYear : String(TL.years[f > 0.5 ? j : i]);
-    if(year !== lastYearShown){ lastYearShown = year; yearVal.textContent = year; }
+    setYear(year, true);
     yearBox.classList.toggle('gap', inGap);
     // ranked left to right, so overtaking is something the money actually does
     if(TL.sort) bins.sort(function(a, b){ return b.v - a.v; });
