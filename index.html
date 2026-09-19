@@ -94,6 +94,29 @@
     opacity:0;visibility:hidden;
   }
   .beat.center{top:0;height:100dvh;justify-content:center;max-height:none;}
+  /* The veil fades out by mid-screen, which is exactly where a centred beat puts its
+     text — so those beats carry their own soft scrim to sit on. */
+  .beat.center::before{
+    content:'';position:absolute;inset:-8% -12%;z-index:-1;pointer-events:none;
+    background:radial-gradient(ellipse 74% 54% at 36% 50%,
+      rgba(7,9,13,.93) 0%, rgba(7,9,13,.82) 40%, rgba(7,9,13,.45) 64%, rgba(7,9,13,0) 82%);
+  }
+
+  /* opening title */
+  .beat.cover .headline{font-size:clamp(34px,7.4vw,92px);line-height:1.04;margin-bottom:16px;}
+  .beat.cover.on .headline{animation:wipe 1s cubic-bezier(.2,.75,.2,1) .12s both;}
+  @keyframes wipe{
+    from{clip-path:inset(0 100% 0 0);}
+    to{clip-path:inset(0 0 0 0);}
+  }
+  .beat.cover.on .eyebrow{animation:rulein .7s cubic-bezier(.2,.75,.2,1) both;}
+  @keyframes rulein{
+    from{clip-path:inset(0 100% 0 0);}
+    to{clip-path:inset(0 0 0 0);}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .beat.cover.on .headline,.beat.cover.on .eyebrow{animation:none;}
+  }
   .beat > *{opacity:0;transform:translateY(16px);transition:opacity .5s ease, transform .55s cubic-bezier(.2,.7,.2,1);}
   .beat.on > *{opacity:1;transform:translateY(0);}
   .beat.on > *:nth-child(1){transition-delay:.04s;}
@@ -274,7 +297,7 @@
 
 <div class="beats" id="beats">
 
-  <section class="beat center" data-chap="0" data-duration="4600" data-scene="rain">
+  <section class="beat center cover" data-chap="0" data-duration="5600" data-scene="rain">
     <div class="eyebrow alert">งบประมาณแผ่นดิน 2570</div>
     <h1 class="headline">งบที่ไม่มีใครอ่าน</h1>
     <p class="sub">เงินภาษี <b>3.79 ล้านล้านบาท</b> ถูกจัดสรรทุกปี บนเอกสารที่เปิดเผยครบถ้วน — แล้วมีใครอ่านจนจบบ้าง? นี่คือ 6 เรื่องที่เจอ ตอนลงมืออ่านจริงทั้ง 318 ไฟล์</p>
@@ -517,6 +540,8 @@
 <script>
 (function(){
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // a reload should restart the film, not drop the viewer back into the middle of it
+  if('scrollRestoration' in history) history.scrollRestoration = 'manual';
   var beats = Array.prototype.slice.call(document.querySelectorAll('.beat'));
   var N = beats.length;
   var runway = document.getElementById('runway');
@@ -559,7 +584,7 @@
             vy:0.0016 + Math.random()*0.0026, sp:0.055 + Math.random()*0.06,
             ph:Math.random() * 6.283, ang:0, rad:0, spin:0});
   }
-  var mode = 'rain', bins = [], CELL = 0;
+  var mode = 'rain', bins = [], CELL = 0, pageStart = performance.now();
 
   function sizeCanvas(){
     dpr = Math.min(2, window.devicePixelRatio || 1);
@@ -793,13 +818,16 @@
     var T = now * 0.001;
 
     if(mode === 'rain'){
-      ctx.fillStyle = 'rgba(240,180,41,0.5)';
+      // opens as a downpour and settles over the first couple of seconds
+      var age = (now - pageStart) / 2400;
+      var boost = 1 + 2.4 * Math.max(0, 1 - age);
+      ctx.fillStyle = 'rgba(240,180,41,' + (0.5 + 0.22 * Math.max(0, 1 - age)).toFixed(2) + ')';
       for(var n = 0; n < NP; n++){
         var p = P[n];
-        p.y += p.vy;
+        p.y += p.vy * boost;
         p.x += Math.sin(T * 0.6 + p.ph) * 0.0004;
         if(p.y > 1.05){ p.y = -0.05; p.x = Math.random(); }
-        ctx.fillRect(p.x * W, p.y * H, 3, 4.5);
+        ctx.fillRect(p.x * W, p.y * H, 3, 4.5 + 3 * Math.max(0, 1 - age));
       }
       return;
     }
