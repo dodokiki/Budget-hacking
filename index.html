@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
 <title>งบที่ไม่มีใครอ่าน</title>
-<meta name="description" content="งบประมาณแผ่นดิน 3.79 ล้านล้านบาท บนเอกสารที่เปิดเผยครบถ้วน แต่แทบไม่มีใครอ่านจนจบ — 6 เรื่องจาก 318 ไฟล์ โดย Watcharapol Limthammalert, AI Trainer Thailand">
+<meta name="description" content="งบประมาณแผ่นดิน 3.79 ล้านล้านบาท ถูกจัดสรรทุกปีบนเอกสารที่เปิดเผยครบถ้วน แต่แทบไม่มีใครอ่านจนจบ — สารคดีข้อมูล 6 บท โดย Watcharapol Limthammalert, AI Trainer Thailand">
 <style>[hidden]{display:none!important}</style>
 </head>
 <body>
@@ -596,7 +596,7 @@
   for(var n = 0; n < NP; n++){
     P.push({x:Math.random(), y:Math.random(), tx:Math.random(), ty:-0.2, on:0, c:0,
             vy:0.0016 + Math.random()*0.0026, sp:0.055 + Math.random()*0.06,
-            ph:Math.random() * 6.283, ang:0, rad:0, spin:0});
+            ph:Math.random() * 6.283, ang:0, rad:0, spin:0, angOff:0, angOffT:0});
   }
   var mode = 'rain', bins = [], CELL = 0, pageStart = performance.now();
 
@@ -801,13 +801,26 @@
     }
     bins = [];
     if(name === 'swirl'){
-      // start each orbit from where the particle already is, so the stacks unwind
-      // into the swirl instead of teleporting
+      // Start each orbit from where the particle already is, so the stacks unwind into
+      // the swirl instead of teleporting — but give it a target radius drawn from a
+      // real disc. Keeping the inherited radius meant a column's rectangular outline
+      // just rotated, and the disc looked square.
+      //
+      // The inherited *angle* needs the same treatment: a row of columns is far wider
+      // than it is tall, so atan2 piles almost everything near 0 and π and the disc
+      // opens as a bar rather than a ring. angOff starts at zero — so frame one is
+      // exactly where the columns stood — and slides to whatever offset lands the
+      // particle on an evenly drawn angle. Taking the short way round keeps the slide
+      // under half a turn, which reads as the stacks unravelling into the swirl.
       for(var n = 0; n < NP; n++){
         var p = P[n], dx = p.x - 0.5, dy = p.y - 0.5;
         p.rad = Math.max(0.06, Math.sqrt(dx*dx + dy*dy));
+        p.radT = 0.1 + Math.pow(Math.random(), 0.62) * 0.66;
         p.ang = Math.atan2(dy, dx);
-        p.spin = (0.0016 + 0.0026 / (p.rad + 0.25)) * (n % 7 ? 1 : 0.6);
+        p.angOff = 0;
+        var d = (Math.random() * 6.283 - p.ang) % 6.283;
+        p.angOffT = d > 3.1416 ? d - 6.283 : (d < -3.1416 ? d + 6.283 : d);
+        p.spin = (0.0016 + 0.0026 / (p.radT + 0.25)) * (n % 7 ? 1 : 0.6);
       }
     }
   }
@@ -1017,7 +1030,10 @@
       for(var n3 = 0; n3 < NP; n3++){
         var s = P[n3];
         s.ang += s.spin;
-        var ox = Math.cos(s.ang) * s.rad, oy = Math.sin(s.ang) * s.rad * RING_FLAT;
+        s.rad += (s.radT - s.rad) * 0.11;             // the inherited shape melts into a disc
+        s.angOff += (s.angOffT - s.angOff) * 0.05;    // ...and the inherited angles even out
+        var a = s.ang + s.angOff;
+        var ox = Math.cos(a) * s.rad, oy = Math.sin(a) * s.rad * RING_FLAT;
         s.x = kx + (ox * RC - oy * RS) * (H / W);
         s.y = ky + (ox * RS + oy * RC);
         var cc = (n3 % 13) ? coolAt((n3 % 97) / 96) : [240, 180, 41];
