@@ -603,8 +603,9 @@
      The same particles that build every column in the film first spell the title,
      then fall apart into the rain the cover sits on. Skipped entirely for
      reduced-motion, and abandoned the moment the viewer scrolls or taps. */
-  var introActive = !reduced, introPts = null, pendingScene = null;
-  var FORM_AT = 850, HOLD_AT = 2500, DROP_AT = 3900, INTRO_END = 4500;
+  var introActive = !reduced, introTitle = null, pendingScene = null, burst = false;
+  var FORM_AT = 800, HOLD_AT = 2700, DROP_AT = 4200, INTRO_END = 5100;
+  var SWEEP = 620;                                   // left-to-right assembly delay
 
   function sampleTitle(){
     if(!W || !H) return null;
@@ -637,13 +638,22 @@
     for(var i = pts.length - 1; i > 0; i--){       // shuffle so glyphs fill in evenly
       var j = (Math.random() * (i + 1)) | 0, t = pts[i]; pts[i] = pts[j]; pts[j] = t;
     }
-    return pts;
+    var x0 = 1, x1 = 0, y0 = 1, y1 = 0;
+    for(var m = 0; m < pts.length; m++){
+      if(pts[m][0] < x0) x0 = pts[m][0];
+      if(pts[m][0] > x1) x1 = pts[m][0];
+      if(pts[m][1] < y0) y0 = pts[m][1];
+      if(pts[m][1] > y1) y1 = pts[m][1];
+    }
+    return {pts:pts, cx:(x0 + x1) / 2, cy:(y0 + y1) / 2, w:x1 - x0, h:y1 - y0};
   }
 
   function endIntro(){
     if(!introActive) return;
     introActive = false;
     document.body.classList.remove('intro');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);                     // wipe the trails before normal drawing
     mode = '';                                     // force setScene to re-apply
     setScene(pendingScene || 'rain');
   }
@@ -892,7 +902,7 @@
   function drawMoney(now){
     if(!W) return;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, W, H);
+    if(!introActive) ctx.clearRect(0, 0, W, H);   // the intro fades the frame instead, for trails
     var dim = (mode === 'calm') ? 0.3 : 1;
     var size = Math.max(2.5, CELL ? CELL - 1.2 : 3);
 
@@ -902,21 +912,63 @@
       var e = now - pageStart;
       if(e > INTRO_END){ endIntro(); }
       else {
-        if(introPts === null && e > 250) introPts = sampleTitle() || false;
-        var forming = introPts && e > FORM_AT && e < DROP_AT;
-        ctx.fillStyle = 'rgba(240,180,41,' + (forming ? 0.95 : 0.62) + ')';
+        if(introTitle === null && e > 250) introTitle = sampleTitle() || false;
+        var TT = introTitle, pts = TT ? TT.pts : null;
+
+        // Trails: the previous frame is faded rather than cleared. While the money is
+        // moving the fade is gentle, so each particle draws a streak; once the title is
+        // assembled it goes hard, or the residue would smear the letters into a haze.
+        var settled = e > HOLD_AT && e < DROP_AT;
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.fillStyle = 'rgba(7,9,13,' + (settled ? 0.72 : 0.30) + ')';
+        ctx.fillRect(0, 0, W, H);
+
+        // glow behind the assembled title
+        if(TT && e > HOLD_AT - 500){
+          var gl = Math.min(1, (e - (HOLD_AT - 500)) / 700) * (e > DROP_AT ? Math.max(0, 1 - (e - DROP_AT) / 500) : 1);
+          if(gl > 0){
+            var rg = ctx.createRadialGradient(TT.cx * W, TT.cy * H, 0, TT.cx * W, TT.cy * H, Math.max(TT.w * W, TT.h * H) * 0.7);
+            rg.addColorStop(0, 'rgba(240,180,41,' + (0.16 * gl).toFixed(3) + ')');
+            rg.addColorStop(1, 'rgba(240,180,41,0)');
+            ctx.globalCompositeOperation = 'lighter';   // only the glow blooms
+            ctx.fillStyle = rg;
+            ctx.fillRect(0, 0, W, H);
+            ctx.globalCompositeOperation = 'source-over';
+          }
+        }
+
+        // the outward burst is computed once, the instant the title lets go
+        if(TT && e >= DROP_AT && !burst){
+          burst = true;
+          for(var b = 0; b < NP; b++){
+            var pb = P[b], dx = pb.x - TT.cx, dy = pb.y - TT.cy;
+            var mg = Math.sqrt(dx * dx + dy * dy) || 1;
+            pb.bvx = (dx / mg) * (0.003 + Math.random() * 0.007);
+            pb.bvy = (dy / mg) * (0.003 + Math.random() * 0.006) - 0.004;
+          }
+        }
+
         for(var q = 0; q < NP; q++){
-          var s = P[q];
-          if(forming && q < introPts.length){
-            // ease into the glyph, then hold it steady
-            var sp = e < HOLD_AT ? 0.085 : 0.16;
-            s.x += (introPts[q][0] - s.x) * sp;
-            s.y += (introPts[q][1] - s.y) * sp;
-            ctx.fillRect(s.x * W - 1.5, s.y * H - 1.5, 3.4, 3.4);
+          var s = P[q], sz = 2.4 + (q % 5) * 0.6;          // a little depth in the field
+          if(TT && e >= DROP_AT){
+            s.bvy += 0.00042;                              // gravity takes the pieces back down
+            s.x += s.bvx; s.y += s.bvy;
+            ctx.fillStyle = 'rgba(240,180,41,0.85)';
+            ctx.fillRect(s.x * W, s.y * H, sz, sz * 1.5);
+          } else if(pts && q < pts.length && e > FORM_AT + pts[q][0] * SWEEP){
+            // assembles left to right, so the title writes itself
+            var sp = e < HOLD_AT ? 0.075 : 0.18;
+            s.x += (pts[q][0] - s.x) * sp;
+            s.y += (pts[q][1] - s.y) * sp;
+            ctx.fillStyle = 'rgba(240,180,41,0.9)';
+            ctx.fillRect(s.x * W - sz / 2, s.y * H - sz / 2, sz, sz);
           } else {
-            s.y += s.vy * (e < FORM_AT ? 3.2 : 1.6);
+            s.y += s.vy * (e < FORM_AT ? 3.4 : 1.8);
             if(s.y > 1.05){ s.y = -0.05; s.x = Math.random(); }
-            ctx.fillRect(s.x * W, s.y * H, 3, 6);
+            // leftover particles step back once the title is up, so they do not
+            // speckle across the letters
+            ctx.fillStyle = 'rgba(240,180,41,' + (settled ? 0.16 : 0.55) + ')';
+            ctx.fillRect(s.x * W, s.y * H, 2.6, settled ? 4 : 7);
           }
         }
         return;
