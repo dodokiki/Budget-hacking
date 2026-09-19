@@ -604,6 +604,27 @@
      then fall apart into the rain the cover sits on. Skipped entirely for
      reduced-motion, and abandoned the moment the viewer scrolls or taps. */
   var introActive = !reduced, introTitle = null, pendingScene = null, burst = false;
+
+  /* The opening runs a spectrum that starts on the film's gold and lands on its teal,
+     so the spectacle resolves into the palette the rest of the piece uses. A particle
+     takes its hue from the x of the letter it is flying to, which makes the assembled
+     title a horizontal gradient. Colour strings are built once, not per frame. */
+  function paletteAt(t){
+    var stops = [[240,180,41],[255,138,61],[255,90,140],[157,107,255],[47,211,181]];
+    var x = Math.max(0, Math.min(0.9999, t)) * (stops.length - 1);
+    var i = x | 0, f = x - i, a = stops[i], b = stops[i + 1] || stops[i];
+    return [(a[0] + (b[0] - a[0]) * f) | 0, (a[1] + (b[1] - a[1]) * f) | 0, (a[2] + (b[2] - a[2]) * f) | 0];
+  }
+  function tintParticles(T){
+    for(var i = 0; i < NP; i++){
+      var c = paletteAt(T && i < T.pts.length ? T.pts[i][0] : Math.random());
+      var head = 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',';
+      P[i].cBright = head + '0.95)';
+      P[i].cFall   = head + '0.5)';
+      P[i].cFaint  = head + '0.14)';
+    }
+  }
+  tintParticles(null);                               // colourful from the first frame
   var FORM_AT = 800, HOLD_AT = 2700, DROP_AT = 4200, INTRO_END = 5100;
   var SWEEP = 620;                                   // left-to-right assembly delay
 
@@ -912,7 +933,10 @@
       var e = now - pageStart;
       if(e > INTRO_END){ endIntro(); }
       else {
-        if(introTitle === null && e > 250) introTitle = sampleTitle() || false;
+        if(introTitle === null && e > 250){
+          introTitle = sampleTitle() || false;
+          if(introTitle) tintParticles(introTitle);   // re-tint by where each is headed
+        }
         var TT = introTitle, pts = TT ? TT.pts : null;
 
         // Trails: the previous frame is faded rather than cleared. While the money is
@@ -920,19 +944,26 @@
         // assembled it goes hard, or the residue would smear the letters into a haze.
         var settled = e > HOLD_AT && e < DROP_AT;
         ctx.globalCompositeOperation = 'source-over';
-        ctx.fillStyle = 'rgba(7,9,13,' + (settled ? 0.72 : 0.30) + ')';
+        ctx.fillStyle = 'rgba(7,9,13,' + (settled ? 0.72 : 0.44) + ')';
         ctx.fillRect(0, 0, W, H);
 
         // glow behind the assembled title
         if(TT && e > HOLD_AT - 500){
           var gl = Math.min(1, (e - (HOLD_AT - 500)) / 700) * (e > DROP_AT ? Math.max(0, 1 - (e - DROP_AT) / 500) : 1);
           if(gl > 0){
-            var rg = ctx.createRadialGradient(TT.cx * W, TT.cy * H, 0, TT.cx * W, TT.cy * H, Math.max(TT.w * W, TT.h * H) * 0.7);
-            rg.addColorStop(0, 'rgba(240,180,41,' + (0.16 * gl).toFixed(3) + ')');
-            rg.addColorStop(1, 'rgba(240,180,41,0)');
             ctx.globalCompositeOperation = 'lighter';   // only the glow blooms
-            ctx.fillStyle = rg;
-            ctx.fillRect(0, 0, W, H);
+            // three coloured pools along the title, painted over the title band only —
+            // filling the whole canvas three times washed the letters out
+            var gy = (TT.cy - TT.h * 1.6) * H, gh = TT.h * 3.2 * H;
+            for(var b3 = 0; b3 < 3; b3++){
+              var px = TT.cx + (b3 - 1) * TT.w * 0.33;
+              var col = paletteAt(0.15 + b3 * 0.38);
+              var rg = ctx.createRadialGradient(px * W, TT.cy * H, 0, px * W, TT.cy * H, TT.w * W * 0.3);
+              rg.addColorStop(0, 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',' + (0.11 * gl).toFixed(3) + ')');
+              rg.addColorStop(1, 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',0)');
+              ctx.fillStyle = rg;
+              ctx.fillRect(0, gy, W, gh);
+            }
             ctx.globalCompositeOperation = 'source-over';
           }
         }
@@ -953,21 +984,21 @@
           if(TT && e >= DROP_AT){
             s.bvy += 0.00042;                              // gravity takes the pieces back down
             s.x += s.bvx; s.y += s.bvy;
-            ctx.fillStyle = 'rgba(240,180,41,0.85)';
+            ctx.fillStyle = s.cBright;
             ctx.fillRect(s.x * W, s.y * H, sz, sz * 1.5);
           } else if(pts && q < pts.length && e > FORM_AT + pts[q][0] * SWEEP){
             // assembles left to right, so the title writes itself
             var sp = e < HOLD_AT ? 0.075 : 0.18;
             s.x += (pts[q][0] - s.x) * sp;
             s.y += (pts[q][1] - s.y) * sp;
-            ctx.fillStyle = 'rgba(240,180,41,0.9)';
+            ctx.fillStyle = s.cBright;
             ctx.fillRect(s.x * W - sz / 2, s.y * H - sz / 2, sz, sz);
           } else {
             s.y += s.vy * (e < FORM_AT ? 3.4 : 1.8);
             if(s.y > 1.05){ s.y = -0.05; s.x = Math.random(); }
             // leftover particles step back once the title is up, so they do not
             // speckle across the letters
-            ctx.fillStyle = 'rgba(240,180,41,' + (settled ? 0.16 : 0.55) + ')';
+            ctx.fillStyle = settled ? s.cFaint : s.cFall;
             ctx.fillRect(s.x * W, s.y * H, 2.6, settled ? 4 : 7);
           }
         }
