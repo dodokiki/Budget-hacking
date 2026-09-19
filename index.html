@@ -72,6 +72,10 @@
     position:fixed;inset:0;z-index:30;pointer-events:none;opacity:.03;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
   }
+  /* the opening holds the page back until the money has spelled the title */
+  .beats,.hud,.scrollcue{transition:opacity .9s ease;}
+  body.intro .beats,body.intro .hud,body.intro .scrollcue{opacity:0;pointer-events:none;}
+
   .runway{position:relative;z-index:0;}
   .spacer{height:100dvh;scroll-snap-align:start;scroll-snap-stop:always;}
 
@@ -595,6 +599,55 @@
   }
   var mode = 'rain', bins = [], CELL = 0, pageStart = performance.now();
 
+  /* ---------- opening title, assembled out of money ----------
+     The same particles that build every column in the film first spell the title,
+     then fall apart into the rain the cover sits on. Skipped entirely for
+     reduced-motion, and abandoned the moment the viewer scrolls or taps. */
+  var introActive = !reduced, introPts = null, pendingScene = null;
+  var FORM_AT = 850, HOLD_AT = 2500, DROP_AT = 3900, INTRO_END = 4500;
+
+  function sampleTitle(){
+    if(!W || !H) return null;
+    var c = document.createElement('canvas'), g = c.getContext('2d');
+    c.width = W; c.height = H;
+    var text = 'งบที่ไม่มีใครอ่าน';
+    var size = Math.min(H * 0.26, W * 0.16);
+    g.font = '700 ' + size + 'px Sarabun, sans-serif';
+    while(g.measureText(text).width > W * 0.84 && size > 14){
+      size -= 2;
+      g.font = '700 ' + size + 'px Sarabun, sans-serif';
+    }
+    g.fillStyle = '#fff';
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    g.fillText(text, W / 2, H * 0.5);
+    // start finer on small screens, or a phone-sized title would be sampled too sparsely
+    var d = g.getImageData(0, 0, W, H).data, pts, step = Math.max(2, Math.round(W / 480));
+    // coarsen the sample until the glyphs need no more particles than we have
+    for(var k = 0; k < 8; k++){
+      pts = [];
+      for(var y = 0; y < H; y += step){
+        for(var x = 0; x < W; x += step){
+          if(d[(y * W + x) * 4 + 3] > 130) pts.push([x / W, y / H]);
+        }
+      }
+      if(pts.length <= NP) break;
+      step += 1;
+    }
+    for(var i = pts.length - 1; i > 0; i--){       // shuffle so glyphs fill in evenly
+      var j = (Math.random() * (i + 1)) | 0, t = pts[i]; pts[i] = pts[j]; pts[j] = t;
+    }
+    return pts;
+  }
+
+  function endIntro(){
+    if(!introActive) return;
+    introActive = false;
+    document.body.classList.remove('intro');
+    mode = '';                                     // force setScene to re-apply
+    setScene(pendingScene || 'rain');
+  }
+
   function sizeCanvas(){
     dpr = Math.min(2, window.devicePixelRatio || 1);
     W = cv.clientWidth; H = cv.clientHeight;
@@ -686,6 +739,7 @@
   }
 
   function setScene(name){
+    if(introActive){ pendingScene = name; return; }   // the intro owns the field until it ends
     if(name === 'calm') name = 'drift';
     var isTL = !!TIMELINES[name];
     if(name === mode && !isTL) return;
@@ -843,6 +897,31 @@
     var size = Math.max(2.5, CELL ? CELL - 1.2 : 3);
 
     var T = now * 0.001;
+
+    if(introActive){
+      var e = now - pageStart;
+      if(e > INTRO_END){ endIntro(); }
+      else {
+        if(introPts === null && e > 250) introPts = sampleTitle() || false;
+        var forming = introPts && e > FORM_AT && e < DROP_AT;
+        ctx.fillStyle = 'rgba(240,180,41,' + (forming ? 0.95 : 0.62) + ')';
+        for(var q = 0; q < NP; q++){
+          var s = P[q];
+          if(forming && q < introPts.length){
+            // ease into the glyph, then hold it steady
+            var sp = e < HOLD_AT ? 0.085 : 0.16;
+            s.x += (introPts[q][0] - s.x) * sp;
+            s.y += (introPts[q][1] - s.y) * sp;
+            ctx.fillRect(s.x * W - 1.5, s.y * H - 1.5, 3.4, 3.4);
+          } else {
+            s.y += s.vy * (e < FORM_AT ? 3.2 : 1.6);
+            if(s.y > 1.05){ s.y = -0.05; s.x = Math.random(); }
+            ctx.fillRect(s.x * W, s.y * H, 3, 6);
+          }
+        }
+        return;
+      }
+    }
 
     if(mode === 'rain'){
       // opens as a downpour and settles over the first couple of seconds
@@ -1137,7 +1216,11 @@
   }
   ppBtn.addEventListener('click', function(){ setAuto(!auto); });
   ['wheel','touchstart'].forEach(function(ev){
-    window.addEventListener(ev, function(){ if(auto) setAuto(false); }, {passive:true});
+    window.addEventListener(ev, function(){ endIntro(); if(auto) setAuto(false); }, {passive:true});
+  });
+  // any deliberate input cuts the opening short rather than making the viewer wait
+  ['keydown','pointerdown'].forEach(function(ev){
+    window.addEventListener(ev, function(){ endIntro(); }, {passive:true});
   });
   document.addEventListener('keydown', function(e){
     if(e.code === 'Space'){ e.preventDefault(); setAuto(!auto); return; }
@@ -1151,9 +1234,12 @@
   });
   document.addEventListener('visibilitychange', function(){ if(document.hidden && auto) setAuto(false); });
 
-  setTimeout(function(){ cue.style.opacity = '0'; }, 4200);
+  if(introActive) document.body.classList.add('intro');
+  setTimeout(function(){ cue.style.opacity = '0'; }, introActive ? 9000 : 4200);
   measure(); sizeCanvas(); render();
   requestAnimationFrame(frame);
+  // a stalled frame loop must never leave the page blank behind the intro
+  setTimeout(endIntro, INTRO_END + 1200);
 })();
 </script>
 </body>
