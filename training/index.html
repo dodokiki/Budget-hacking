@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>งบฝึกอบรม — เงินที่รัฐใช้พัฒนาคนของตัวเอง</title>
+<meta name="description" content="10 ปีของงบฝึกอบรมข้าราชการไทย ตั้งไว้ 14,766 ล้านบาท ได้ใช้จริง 10,758 ล้านบาท วิเคราะห์จากรายการงบประมาณ 2.1 ล้านรายการ โดย Watcharapol Limthammalert, AI Trainer Thailand">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@400;600;700&family=IBM+Plex+Sans+Thai:wght@400;600&display=swap">
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:#05070E;overflow:hidden;
+            font-family:'IBM Plex Sans Thai',Tahoma,sans-serif;-webkit-text-size-adjust:100%}
+  .stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;
+         transform-origin:50% 50%;transform:translate(-50%,-50%)}
+  .stage > section{position:absolute;inset:0;width:1920px;height:1080px;overflow:hidden}
+  #counter{position:fixed;right:18px;bottom:14px;z-index:9;
+           font-size:13px;letter-spacing:1px;color:#6C7789;
+           font-variant-numeric:tabular-nums;pointer-events:none}
+  #hint{position:fixed;left:18px;bottom:14px;z-index:9;font-size:13px;color:#4A5568;pointer-events:none}
+  @media (max-width:700px){#hint{display:none}}
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+<section id="cover" data-transition="fade" style="background:#0B1020; color:#F4F1EA; font-family:'IBM Plex Sans Thai', Tahoma, sans-serif; padding:84px 104px; display:flex; flex-direction:column; justify-content:space-between">
+  <p style="font-size:26px; font-weight:600; letter-spacing:3px; color:#F0B429">งบประมาณแผ่นดิน · บทที่ยังไม่มีใครอ่าน</p>
+  <div style="display:flex; flex-direction:column; gap:36px">
+    <h1 style="font-family:'Noto Serif Thai', Georgia, serif; font-size:132px; font-weight:700; line-height:1.12; width:1500px">เงินที่รัฐใช้<br><span style="color:#F0B429">พัฒนาคนของตัวเอง</span></h1>
+    <p style="font-size:38px; line-height:1.5; width:1180px; color:#C9D1E0">10 ปีของงบฝึกอบรมข้าราชการ — ตั้งไว้ 14,766 ล้านบาท <span style="white-space:nowrap">ได้ใช้จริง 10,758 ล้านบาท</span></p>
+  </div>
+  <div style="display:flex; align-items:flex-end; justify-content:space-between">
+    <p style="font-size:28px; color:#8A94A6; line-height:1.5"><span style="white-space:nowrap">Watcharapol Limthammalert</span><br><span style="color:#F0B429; font-weight:600">AI Trainer Thailand</span></p>
+    <p style="font-size:24px; color:#8A94A6; text-align:right; line-height:1.6">ข้อมูล: PBO ปีงบประมาณ 2558–2568<br>กมธ.ติดตามงบประมาณ · อนุ กมธ.ฝึกอบรม</p>
+  </div>
+</section>
+<section id="source" data-transition="fade" style="background:#F4F1EA; color:#141A28; font-family:'IBM Plex Sans Thai', Tahoma, sans-serif; padding:84px 104px 124px; display:flex; flex-direction:column; gap:34px">
+  <h2 style="font-family:'Noto Serif Thai', Georgia, serif; font-size:56px; font-weight:600; line-height:1.15">ข้อมูลที่ใช้</h2>
+  <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:32px">
+    <div style="background:#FFFFFF; border:1px solid #DCD8CD; border-radius:18px; padding:44px; display:flex; flex-direction:column; gap:14px">
+      <p style="font-size:84px; font-weight:600; line-height:1; color:#1E4D6B">2.1<span style="font-size:40px"> ล้าน</span></p>
+      <h3 style="font-size:30px; font-weight:600">รายการงบประมาณ</h3>
+      <p style="font-size:26px; color:#5A6472; line-height:1.5">เอกสาร PBO ปีงบประมาณ 2558–2568 รวม 11 แฟ้ม</p>
+    </div>
+    <div style="background:#FFFFFF; border:1px solid #DCD8CD; border-radius:18px; padding:44px; display:flex; flex-direction:column; gap:14px">
+      <p style="font-size:84px; font-weight:600; line-height:1; color:#1E4D6B">184</p>
+      <h3 style="font-size:30px; font-weight:600">หน่วยงานที่ต้องชี้แจง</h3>
+      <p style="font-size:26px; color:#5A6472; line-height:1.5">เล่มชี้แจงต่อคณะอนุ กมธ. ฝึกอบรม ปี 2570</p>
+    </div>
+    <div style="background:#FFFFFF; border:1px solid #DCD8CD; border-radius:18px; padding:44px; display:flex; flex-direction:column; gap:14px">
+      <p style="font-size:84px; font-weight:600; line-height:1; color:#1E4D6B">168</p>
+      <h3 style="font-size:30px; font-weight:600">เอกสารชี้แจง</h3>
+      <p style="font-size:26px; color:#5A6472; line-height:1.5">กมธ.ติดตามงบประมาณ 13 ครั้งประชุม และ OPEN SSO</p>
+    </div>
+  </div>
+  <div style="flex:1"></div>
+  <p style="font-size:30px; line-height:1.6; width:1450px; color:#3C4454">ทุกตัวเลขในสไลด์นี้นับจากบรรทัดรายการจริงในเอกสารงบประมาณ ไม่ใช่ยอดสรุปที่หน่วยงานรายงาน</p>
+  <p style="position:absolute; left:104px; bottom:52px; font-size:24px; color:#7A8494">ที่มา: สำนักงบประมาณของรัฐสภา (PBO) · คณะกรรมาธิการติดตามงบประมาณ สภาผู้แทนราษฎร</p>
+</section>
+<section id="trend" data-transition="fade" style="background:#F4F1EA; color:#141A28; font-family:'IBM Plex Sans Thai', Tahoma, sans-serif; padding:84px 104px 124px; display:flex; flex-direction:column; gap:26px">
+  <h2 style="font-family:'Noto Serif Thai', Georgia, serif; font-size:54px; font-weight:600; line-height:1.15">งบฝึกอบรมข้าราชการ 10 ปี</h2>
+  <div style="display:flex; align-items:center; gap:40px">
+    <p style="font-size:26px; color:#1E4D6B; font-weight:600">■ ตั้งงบไว้ (พ.ร.บ.)</p>
+    <p style="font-size:26px; color:#B8860B; font-weight:600">■ เบิกจ่ายจริง</p>
+    <p style="font-size:26px; color:#5A6472">หน่วย: ล้านบาท</p>
+  </div>
+  <div style="display:flex; align-items:flex-end; gap:16px; height:372px">
+    <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:6px">
+      <p style="font-size:23px; font-weight:600; color:#1E4D6B; line-height:1.1">1,693</p><p style="font-size:23px; font-weight:600; color:#B8860B; line-height:1.1">1,498</p>
+      <div style="display:flex; align-items:flex-end; gap:7px; height:300px"><div style="width:45px; height:226px; background:#1E4D6B; border-radius:5px 5px 0 0"></div><div style="width:45px; height:200px; background:#F0B429; border-radius:5px 5px 0 0"></div></div>
+    </div>
+    <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:6px">
+      <p style="font-size:23px; font-weight:600; color:#1E4D6B; line-height:1.1">2,247</p><p style="font-size:23px; font-weight:600; color:#B8860B; line-height:1.1">1,928</p>
+      <div style="display:flex; align-items:flex-end; gap:7px; height:300px"><div style="width:45px; height:300px; background:#1E4D6B; border-radius:5px 5px 0 0"></div><div style="width:45px; height:257px; background:#F0B429; border-radius:5px 5px 0 0"></div></div>
+    </div>
+    <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:6px">
+      <p style="font-size:23px; font-weight:600; color:#1E4D6B; line-height:1.1">1,852</p><p style="font-size:23px; font-weight:600; color:#B8860B; line-height:1.1">1,749</p>
+      <div style="display:flex; align-items:flex-end; gap:7px; height:300px"><div style="width:45px; height:247px; background:#1E4D6B; border-radius:5px 5px 0 0"></div><div style="width:45px; height:234px; background:#F0B429; border-radius:5px 5px 0 0"></div></div>
+    </div>
+    <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:6px">
+      <p style="font-size:23px; font-weight:600; color:#1E4D6B; line-height:1.1">1,401</p><p style="font-size:23px; font-weight:600; color:#B8860B; line-height:1.1">1,154</p>
+      <div style="display:flex; align-items:flex-end; gap:7px; height:300px"><div style="width:45px; height:187px; background:#1E4D6B; border-radius:5px 5px 0 0"></div><div style="width:45px; height:154px; background:#F0B429; border-radius:5px 5px 0 0"></div></div>
+    </div>
+    <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:6px">
+      <p style="font-size:21px; font-weight:600; color:#B4AB97; line-height:1.1">ไฟล์เสีย</p><p style="font-size:23px; color:#B4AB97; line-height:1.1">—</p>
+      <div style="display:flex; align-items:flex-end; height:300px"><div style="width:97px; height:84px; background:#E7E2D6; border:2px dashed #B4AB97; border-radius:6px"></div></div>
+    </div>
+    <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:6px">
+      <p style="font-size:23px; font-weight:600; color:#1E4D6B; line-height:1.1">1,637</p><p style="font-size:23px; font-weight:600; color:#B8860B; line-height:1.1">683</p>
+      <div style="display:flex; align-items:flex-end; gap:7px; height:300px"><div style="width:45px; height:219px; background:#1E4D6B; border-radius:5px 5px 0 0"></div><div style="width:45px; height:91px; background:#F0B429; border-radius:5px 5px 0 0"></div></div>
+    </div>
+    <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:6px">
+      <p style="font-size:23px; font-weight:600; color:#1E4D6B; line-height:1.1">1,098</p><p style="font-size:23px; font-weight:600; color:#B8860B; line-height:1.1">669</p>
+      <div style="display:flex; align-items:flex-end; gap:7px; height:300px"><div style="width:45px; height:147px; background:#1E4D6B; border-radius:5px 5px 0 0"></div><div style="width:45px; height:89px; background:#F0B429; border-radius:5px 5px 0 0"></div></div>
+    </div>
+    <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:6px">
+      <p style="font-size:23px; font-weight:600; color:#1E4D6B; line-height:1.1">865</p><p style="font-size:23px; font-weight:600; color:#B8860B; line-height:1.1">551</p>
+      <div style="display:flex; align-items:flex-end; gap:7px; height:300px"><div style="width:45px; height:115px; background:#1E4D6B; border-radius:5px 5px 0 0"></div><div style="width:45px; height:74px; background:#F0B429; border-radius:5px 5px 0 0"></div></div>
+    </div>
+    <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:6px">
+      <p style="font-size:23px; font-weight:600; color:#B02A1E; line-height:1.1">845</p><p style="font-size:23px; font-weight:600; color:#B8860B; line-height:1.1">590</p>
+      <div style="display:flex; align-items:flex-end; gap:7px; height:300px"><div style="width:45px; height:113px; background:#FF5A4D; border-radius:5px 5px 0 0"></div><div style="width:45px; height:79px; background:#F0B429; border-radius:5px 5px 0 0"></div></div>
+    </div>
+    <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:6px">
+      <p style="font-size:23px; font-weight:600; color:#1E4D6B; line-height:1.1">1,273</p><p style="font-size:23px; font-weight:600; color:#B8860B; line-height:1.1">685</p>
+      <div style="display:flex; align-items:flex-end; gap:7px; height:300px"><div style="width:45px; height:170px; background:#1E4D6B; border-radius:5px 5px 0 0"></div><div style="width:45px; height:91px; background:#F0B429; border-radius:5px 5px 0 0"></div></div>
+    </div>
+    <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:6px">
+      <p style="font-size:23px; font-weight:600; color:#1E4D6B; line-height:1.1">1,855</p><p style="font-size:23px; font-weight:600; color:#B8860B; line-height:1.1">1,251</p>
+      <div style="display:flex; align-items:flex-end; gap:7px; height:300px"><div style="width:45px; height:248px; background:#1E4D6B; border-radius:5px 5px 0 0"></div><div style="width:45px; height:167px; background:#F0B429; border-radius:5px 5px 0 0"></div></div>
+    </div>
+  </div>
+  <div style="display:flex; gap:16px">
+    <p style="flex:1; text-align:center; font-size:27px; color:#5A6472">2558</p>
+    <p style="flex:1; text-align:center; font-size:27px; color:#141A28; font-weight:600">2559</p>
+    <p style="flex:1; text-align:center; font-size:27px; color:#5A6472">2560</p>
+    <p style="flex:1; text-align:center; font-size:27px; color:#5A6472">2561</p>
+    <p style="flex:1; text-align:center; font-size:27px; color:#B4AB97">2562</p>
+    <p style="flex:1; text-align:center; font-size:27px; color:#5A6472">2563</p>
+    <p style="flex:1; text-align:center; font-size:27px; color:#5A6472">2564</p>
+    <p style="flex:1; text-align:center; font-size:27px; color:#5A6472">2565</p>
+    <p style="flex:1; text-align:center; font-size:27px; color:#B02A1E; font-weight:600">2566</p>
+    <p style="flex:1; text-align:center; font-size:27px; color:#5A6472">2567</p>
+    <p style="flex:1; text-align:center; font-size:27px; color:#5A6472">2568</p>
+  </div>
+  <p style="font-size:27px; color:#3C4454; line-height:1.5; width:1600px">สูงสุดปี 2559 ที่ 2,247 ล้านบาท ต่ำสุดปี 2566 ที่ 845 ล้านบาท — <span style="white-space:nowrap">ลดลง 62%</span> · <span style="white-space:nowrap">ตั้งแต่ปี 2563 ช่องว่างระหว่างเงินที่ตั้งกับเงินที่ใช้จริงถ่างออกชัดเจน</span></p>
+  <p style="position:absolute; left:104px; bottom:52px; font-size:24px; color:#7A8494">ที่มา: PBO — เฉพาะรายการที่ตัวรายการเองเป็นค่าฝึกอบรม และเป็นรายจ่ายประจำ (ตัดงบลงทุนออก) · ปี 2562 ข้ามเพราะไฟล์ต้นฉบับเสียหาย</p>
+</section>
+<section id="gap" data-transition="magic" style="background:#F0B429; color:#1A1405; font-family:'IBM Plex Sans Thai', Tahoma, sans-serif; padding:84px 104px; display:flex; flex-direction:column; justify-content:center; gap:32px">
+  <p style="font-size:30px; font-weight:600; letter-spacing:3px">ใน 10 ปี รัฐตั้งงบฝึกอบรมไว้ 14,766 ล้านบาท</p>
+  <h1 style="font-family:'Noto Serif Thai', Georgia, serif; font-size:200px; font-weight:700; line-height:1">4,007 <span style="font-size:96px">ล้านบาท</span></h1>
+  <p style="font-size:52px; font-weight:600; line-height:1.35; width:1500px">ไม่เคยถูกใช้ — คิดเป็น 27% ของงบพัฒนาคนทั้งหมด</p>
+  <p style="font-size:30px; line-height:1.6; width:1400px; color:#4A3B0C">ปี 2563 หนักที่สุด ตั้งไว้ 1,637 ล้านบาท ได้ใช้จริง 683 ล้านบาท <span style="white-space:nowrap">หรือ 42%</span></p>
+</section>
+<section id="share" data-transition="fade" style="background:#0B1020; color:#F4F1EA; font-family:'IBM Plex Sans Thai', Tahoma, sans-serif; padding:84px 104px 124px; display:flex; flex-direction:column; gap:34px">
+  <h2 style="font-family:'Noto Serif Thai', Georgia, serif; font-size:56px; font-weight:600; line-height:1.15">สัดส่วนต่องบประมาณแผ่นดินทั้งหมด</h2>
+  <div style="display:flex; gap:32px; align-items:stretch">
+    <div style="flex:1; background:#141B2E; border:1px solid #27324D; border-radius:18px; padding:38px; display:flex; flex-direction:column; gap:12px">
+      <p style="font-size:26px; color:#8A94A6; font-weight:600">ปี 2559 — จุดสูงสุด</p>
+      <p style="font-size:96px; font-weight:600; line-height:1; color:#F0B429">0.081%</p>
+      <p style="font-size:28px; color:#C9D1E0; line-height:1.5">2,247 ล้านบาท จากงบ 2.78 ล้านล้าน</p>
+    </div>
+    <div style="flex:1; background:#141B2E; border:1px solid #27324D; border-radius:18px; padding:38px; display:flex; flex-direction:column; gap:12px">
+      <p style="font-size:26px; color:#8A94A6; font-weight:600">ปี 2566 — จุดต่ำสุด</p>
+      <p style="font-size:96px; font-weight:600; line-height:1; color:#FF5A4D">0.027%</p>
+      <p style="font-size:28px; color:#C9D1E0; line-height:1.5">845 ล้านบาท จากงบ 3.19 ล้านล้าน</p>
+    </div>
+    <div style="flex:1; background:#141B2E; border:1px solid #27324D; border-radius:18px; padding:38px; display:flex; flex-direction:column; gap:12px">
+      <p style="font-size:26px; color:#8A94A6; font-weight:600">ปี 2568 — ล่าสุด</p>
+      <p style="font-size:96px; font-weight:600; line-height:1; color:#C9D1E0">0.049%</p>
+      <p style="font-size:28px; color:#C9D1E0; line-height:1.5">1,855 ล้านบาท จากงบ 3.75 ล้านล้าน</p>
+    </div>
+  </div>
+  <div style="flex:1"></div>
+  <p style="font-size:38px; line-height:1.5; width:1560px">ทุก 10,000 บาทที่รัฐใช้ มีไม่ถึง <span style="color:#F0B429; font-weight:600">5 บาท</span> ที่ใช้พัฒนาความรู้ของคนที่ทำงานให้รัฐเอง</p>
+  <p style="position:absolute; left:104px; bottom:52px; font-size:24px; color:#6C7789">ฐานเปรียบเทียบ: วงเงินตาม พ.ร.บ. งบประมาณรายจ่ายแต่ละปี รวม พ.ร.บ. เพิ่มเติม</p>
+</section>
+<section id="traps" data-transition="fade" style="background:#F4F1EA; color:#141A28; font-family:'IBM Plex Sans Thai', Tahoma, sans-serif; padding:84px 104px 124px; display:flex; flex-direction:column; gap:20px">
+  <h2 style="font-family:'Noto Serif Thai', Georgia, serif; font-size:50px; font-weight:600; line-height:1.15">กับดักสามชั้น ก่อนจะได้ตัวเลขที่เชื่อได้</h2>
+  <div style="display:flex; flex-direction:column; gap:12px">
+    <div style="display:flex; gap:28px; align-items:flex-start; background:#FFFFFF; border:1px solid #DCD8CD; border-radius:14px; padding:18px 30px">
+      <p style="font-size:38px; font-weight:600; color:#B4AB97; width:48px; line-height:1.2">1</p>
+      <div style="flex:1; display:flex; flex-direction:column; gap:6px">
+        <h3 style="font-size:30px; font-weight:600; line-height:1.25">แถวยอดรวมปนอยู่ในข้อมูลดิบ</h3>
+        <p style="font-size:25px; color:#5A6472; line-height:1.45">ไฟล์ 7 ปีจาก 11 ปีมีแถว Grand Total ท้ายชีต ทำให้ยอดรวมประเทศกลายเป็นสองเท่า และสัดส่วนงบอบรมเหลือครึ่งเดียวของความจริง</p>
+      </div>
+    </div>
+    <div style="display:flex; gap:28px; align-items:flex-start; background:#FFFFFF; border:1px solid #DCD8CD; border-radius:14px; padding:18px 30px">
+      <p style="font-size:38px; font-weight:600; color:#B4AB97; width:48px; line-height:1.2">2</p>
+      <div style="flex:1; display:flex; flex-direction:column; gap:6px">
+        <h3 style="font-size:30px; font-weight:600; line-height:1.25">ค้นด้วยชื่อโครงการ ได้ของที่ไม่เกี่ยวมาด้วย</h3>
+        <p style="font-size:25px; color:#5A6472; line-height:1.45">ถ้าโครงการแม่มีคำว่า "อบรม" ทุกบรรทัดใต้มันจะถูกนับหมด รวมถึงรายการชดเชยดอกเบี้ยเงินกู้เกษตรกร</p>
+      </div>
+    </div>
+    <div style="display:flex; gap:28px; align-items:flex-start; background:#FFF4F3; border:2px solid #FF5A4D; border-radius:14px; padding:18px 30px">
+      <p style="font-size:38px; font-weight:600; color:#FF5A4D; width:48px; line-height:1.2">3</p>
+      <div style="flex:1; display:flex; flex-direction:column; gap:6px">
+        <h3 style="font-size:30px; font-weight:600; line-height:1.25; color:#B02A1E">งบลงทุนที่พ่วงคำว่า "การฝึกอบรม"</h3>
+        <p style="font-size:25px; color:#5A2620; line-height:1.45">"เครื่องบินรับ-ส่งบุคคลสำคัญ ทดแทน บ.ล.19 จำนวน 1 เครื่อง พร้อมอุปกรณ์ อะไหล่ <span style="font-weight:600">การฝึกอบรม</span>…" — <span style="white-space:nowrap">2,434 ล้านบาท</span> และเฮลิคอปเตอร์อีก <span style="white-space:nowrap">668 ล้านบาท</span></p>
+      </div>
+    </div>
+  </div>
+  <div style="flex:1"></div>
+  <p style="font-size:28px; line-height:1.4; width:1600px">ถ้าไม่กรองทั้งสามชั้น ปี 2568 จะอ่านได้ว่า <span style="font-weight:600">6,484 ล้านบาท</span> แทนที่จะเป็น <span style="color:#B02A1E; font-weight:600">1,855 ล้านบาท</span> — ผิดไป 3.5 เท่า</p>
+  <p style="position:absolute; left:104px; bottom:52px; font-size:24px; color:#7A8494">ตรวจสอบกับไฟล์ต้นฉบับ PBO 2568.xlsx ชีต "เบิกจ่ายภาพรวมทุกมิติ (8)" แถว 416–417</p>
+</section>
+<section id="misclass" data-transition="fade" style="background:#0B1020; color:#F4F1EA; font-family:'IBM Plex Sans Thai', Tahoma, sans-serif; padding:84px 104px 124px; display:flex; flex-direction:column; gap:30px">
+  <h2 style="font-family:'Noto Serif Thai', Georgia, serif; font-size:56px; font-weight:600; line-height:1.15">ค้นคำว่า "อบรม" แล้วได้อะไรกลับมาบ้าง</h2>
+  <p style="font-size:32px; color:#C9D1E0; line-height:1.5; width:1500px">จาก 8,339 รายการที่ชื่อรายการมีคำว่าอบรม รวม 29,811 ล้านบาท — มี 3,259 รายการที่ไม่ใช่การอบรม</p>
+  <table style="font-family:'IBM Plex Sans Thai', Tahoma, sans-serif; font-size:28px; color:#F4F1EA">
+    <tr style="background:#1B2440">
+      <th style="width:26%; text-align:left; padding:18px 22px">จริงๆ แล้วคือหมวด</th>
+      <th style="width:14%; text-align:right">รายการ</th>
+      <th style="width:20%; text-align:right">ล้านบาท</th>
+      <th style="width:40%; text-align:left">ตัวอย่างที่ใหญ่ที่สุด</th>
+    </tr>
+    <tr><td style="text-align:left">ที่ดินและสิ่งก่อสร้าง</td><td style="text-align:right">2,036</td><td style="text-align:right; color:#FF5A4D; font-weight:600">8,627</td><td style="text-align:left">อาคารศูนย์สารสนเทศที่ดิน 222.9</td></tr>
+    <tr style="background:#141B2E"><td style="text-align:left">ยานพาหนะและอากาศยาน</td><td style="text-align:right">250</td><td style="text-align:right; color:#FF5A4D; font-weight:600">3,989</td><td style="text-align:left">เครื่องบิน VVIP 2,434</td></tr>
+    <tr><td style="text-align:left">ครุภัณฑ์และเครื่องมือ</td><td style="text-align:right">970</td><td style="text-align:right">610</td><td style="text-align:left">ชุดฝึกโรงงานอัจฉริยะ 26.0</td></tr>
+  </table>
+  <div style="flex:1"></div>
+  <div style="background:#1B2440; border-left:6px solid #F0B429; border-radius:12px; padding:40px 44px; display:flex; flex-direction:column; gap:14px">
+    <p style="font-size:44px; font-weight:600; line-height:1.3">44% ของยอดที่คีย์เวิร์ดจับได้ ไม่ใช่การฝึกอบรม</p>
+    <p style="font-size:29px; color:#C9D1E0; line-height:1.5">สาเหตุหลักคือชื่อสถานที่ติดมากับรายการ — อะไรก็ตามที่สร้างใน "ศูนย์ฝึกอบรม" ไม่ว่าจะเป็นท่าเทียบเรือ รั้ว หรือศูนย์ข้อมูล จะมีคำว่าอบรมอยู่ในชื่อเสมอ</p>
+  </div>
+  <p style="position:absolute; left:104px; bottom:52px; font-size:24px; color:#6C7789">จำแนกจากรายการที่คำค้นตรงกับชื่อรหัสงบประมาณ ปีงบประมาณ 2558–2568</p>
+</section>
+<section id="nacc" data-transition="fade" style="background:#F4F1EA; color:#141A28; font-family:'IBM Plex Sans Thai', Tahoma, sans-serif; padding:84px 104px 124px; display:flex; flex-direction:column; gap:28px">
+  <div style="display:flex; flex-direction:column; gap:12px">
+    <p style="font-size:26px; font-weight:600; letter-spacing:3px; color:#B8860B">กรณีศึกษา</p>
+    <h2 style="font-family:'Noto Serif Thai', Georgia, serif; font-size:54px; font-weight:600; line-height:1.15">หลักสูตรที่ตัดดูงานต่างประเทศออก แล้วงบเพิ่มเท่าตัว</h2>
+  </div>
+  <p style="font-size:26px; color:#5A6472; line-height:1.45; width:1560px">โครงการนักบริหารยุทธศาสตร์การป้องกันและปราบปรามการทุจริตระดับสูง (นยปส.) — สำนักงาน ป.ป.ช. · <span style="white-space:nowrap">ชื่อโครงการระบุ "รุ่นที่ 14–18" คือปีละหนึ่งรุ่น</span></p>
+  <table style="font-family:'IBM Plex Sans Thai', Tahoma, sans-serif; font-size:26px; color:#141A28">
+    <tr style="background:#E7E2D6">
+      <th style="width:12%; text-align:left; padding:16px 20px">ปีงบ</th>
+      <th style="width:16%; text-align:left">รุ่น / จำนวน</th>
+      <th style="width:20%; text-align:right">ได้รับจัดสรร</th>
+      <th style="width:16%; text-align:right">ต่อหัว</th>
+      <th style="width:36%; text-align:left">ดูงานต่างประเทศ</th>
+    </tr>
+    <tr><td style="text-align:left">2566</td><td style="text-align:left">14 · 85 คน</td><td style="text-align:right">13,919,400</td><td style="text-align:right">163,758</td><td style="text-align:left">ออสเตรีย + สวิส (IACA)</td></tr>
+    <tr style="background:#FFFFFF"><td style="text-align:left">2567</td><td style="text-align:left">15 · 85 คน</td><td style="text-align:right">12,159,000</td><td style="text-align:right">143,047</td><td style="text-align:left">ออสเตรีย + เยอรมนี</td></tr>
+    <tr><td style="text-align:left">2568</td><td style="text-align:left">16 · 85 คน</td><td style="text-align:right">13,043,000</td><td style="text-align:right">153,447</td><td style="text-align:left">University of Exeter, UK</td></tr>
+    <tr style="background:#FFE9E7"><td style="text-align:left; color:#B02A1E; font-weight:600">2569</td><td style="text-align:left; color:#B02A1E; font-weight:600">17 · 90 คน</td><td style="text-align:right; color:#B02A1E; font-weight:600">26,180,000</td><td style="text-align:right; color:#B02A1E; font-weight:600">290,889</td><td style="text-align:left; color:#B02A1E; font-weight:600">งดเว้น ตามมติ ครม.</td></tr>
+    <tr><td style="text-align:left">2570</td><td style="text-align:left">18 · คำขอ</td><td style="text-align:right">26,806,000</td><td style="text-align:right">—</td><td style="text-align:left">—</td></tr>
+  </table>
+  <div style="flex:1"></div>
+  <p style="font-size:32px; line-height:1.4; width:1600px">จำนวนผู้เข้าอบรมเพิ่ม <span style="font-weight:600">6%</span> · งบประมาณเพิ่ม <span style="color:#B02A1E; font-weight:600">101%</span> · ต้นทุนต่อหัวเพิ่ม <span style="color:#B02A1E; font-weight:600">90%</span> ทั้งที่ตัดรายการที่แพงที่สุดออก</p>
+  <p style="position:absolute; left:104px; bottom:52px; font-size:24px; color:#7A8494">ที่มา: สำนักงาน ป.ป.ช. "รูปเล่ม" หน้า 98 เสนอคณะกรรมาธิการติดตามงบประมาณ 4 มิ.ย. 2569 — ตัวเลขทุกตัวจากเอกสารต้นฉบับ</p>
+</section>
+<section id="nacc-q" data-transition="fade" style="background:#F4F1EA; color:#141A28; font-family:'IBM Plex Sans Thai', Tahoma, sans-serif; padding:84px 104px 124px; display:flex; flex-direction:column; gap:20px">
+  <h2 style="font-family:'Noto Serif Thai', Georgia, serif; font-size:54px; font-weight:600; line-height:1.15">เอกสารฉบับเดียวกัน อธิบายโครงการอื่นได้</h2>
+  <div style="display:flex; gap:22px; align-items:stretch">
+    <div style="flex:1; background:#FFFFFF; border:1px solid #DCD8CD; border-radius:16px; padding:24px 30px; display:flex; flex-direction:column; gap:12px">
+      <h3 style="font-size:29px; font-weight:600; line-height:1.3">หลักสูตรผู้ช่วยพนักงานไต่สวน</h3>
+      <p style="font-size:25px; color:#5A6472; line-height:1.5">2567 — 999,000 บาท · รุ่น 9 (50 คน)<br>2569 — 10,343,000 บาท · <span style="white-space:nowrap">รุ่น 10 (35) + รุ่น 11 (118)</span></p>
+      <div style="flex:1"></div>
+      <p style="font-size:27px; font-weight:600; color:#1E4D6B; line-height:1.4">งบขึ้น 10 เท่า — เอกสารระบุเหตุผลไว้ คือผู้เข้าอบรมเพิ่มจาก 50 เป็น 153 คน</p>
+    </div>
+    <div style="flex:1; background:#FFE9E7; border:2px solid #FF5A4D; border-radius:16px; padding:24px 30px; display:flex; flex-direction:column; gap:12px">
+      <h3 style="font-size:29px; font-weight:600; line-height:1.3; color:#B02A1E">หลักสูตร นยปส.</h3>
+      <p style="font-size:25px; color:#5A2620; line-height:1.5">2568 — 13,043,000 บาท · รุ่น 16 (85 คน)<br>2569 — 26,180,000 บาท · รุ่น 17 (90 คน)</p>
+      <div style="flex:1"></div>
+      <p style="font-size:27px; font-weight:600; color:#B02A1E; line-height:1.4">งบขึ้นเท่าตัว — ช่องผลการดำเนินงานเขียนเพียงว่า "งดเว้นการอบรมและศึกษาดูงานต่างประเทศ"</p>
+    </div>
+  </div>
+  <div style="flex:1"></div>
+  <div style="background:#0B1020; border-radius:14px; padding:22px 30px; display:flex; flex-direction:column; gap:10px">
+    <p style="font-size:34px; font-weight:600; color:#F0B429; line-height:1.3">คำถามที่ยังไม่มีคำตอบในเอกสาร: งบส่วนที่เพิ่มขึ้น 13 ล้านบาท ใช้ทำอะไร</p>
+    <p style="font-size:25px; color:#C9D1E0; line-height:1.45">ข้อมูลนี้ไม่ได้ชี้ว่ามีการทุจริต — ณ มิถุนายน 2569 ยอดเบิกจ่ายจริงอยู่ที่ 5,787,153 บาท หรือ 22% ของที่ได้รับจัดสรร และเอกสารไม่ได้ระบุว่ามีกิจกรรมใดมาแทนการดูงานต่างประเทศ</p>
+  </div>
+  <p style="position:absolute; left:104px; bottom:52px; font-size:24px; color:#7A8494">ที่มา: สำนักงาน ป.ป.ช. "รูปเล่ม" หน้า 98 — ตารางสรุปโครงการประเภทการอบรม ปีงบประมาณ 2566–2570</p>
+</section>
+<section id="sso" data-transition="fade" style="background:#0B1020; color:#F4F1EA; font-family:'IBM Plex Sans Thai', Tahoma, sans-serif; padding:84px 104px 124px; display:flex; flex-direction:column; gap:20px">
+  <h2 style="font-family:'Noto Serif Thai', Georgia, serif; font-size:52px; font-weight:600; line-height:1.15">ดูงานต่างประเทศที่กลับมาโตกว่าก่อนโควิด</h2>
+  <p style="font-size:27px; color:#C9D1E0; line-height:1.45; width:1600px">สำนักงานประกันสังคม — ค่าใช้จ่ายดูงานและประชุมต่างประเทศของคณะกรรมการ ผู้บริหาร และเจ้าหน้าที่ · <span style="white-space:nowrap">เป็นเงินกองทุนประกันสังคม ไม่ใช่งบแผ่นดิน</span></p>
+  <div style="display:flex; align-items:flex-end; gap:60px; height:250px">
+    <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:10px"><p style="font-size:32px; font-weight:600; color:#C9D1E0">20.0 ล.</p><div style="width:100%; height:100px; background:#1E4D6B; border-radius:8px 8px 0 0"></div></div>
+    <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:10px"><p style="font-size:32px; font-weight:600; color:#6C7789">ไม่ปรากฏ</p><div style="width:100%; height:6px; background:#3A4560; border-radius:3px"></div></div>
+    <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:10px"><p style="font-size:32px; font-weight:600; color:#F0B429">42.0 ล.</p><div style="width:100%; height:210px; background:#F0B429; border-radius:8px 8px 0 0"></div></div>
+  </div>
+  <div style="display:flex; gap:60px">
+    <p style="flex:1; text-align:center; font-size:26px; color:#C9D1E0; line-height:1.35">2563 · ก่อนโควิด</p>
+    <p style="flex:1; text-align:center; font-size:26px; color:#8A94A6; line-height:1.35">2564 · ช่วงโควิด</p>
+    <p style="flex:1; text-align:center; font-size:26px; color:#F0B429; line-height:1.35">2567 · ล่าสุด</p>
+  </div>
+  <div style="flex:1"></div>
+  <div style="background:#1B2440; border-left:6px solid #F0B429; border-radius:12px; padding:20px 30px; display:flex; flex-direction:column; gap:8px">
+    <p style="font-size:30px; font-weight:600; line-height:1.35">ปี 2567 ตั้งไว้ 41,965,700 บาท — ใช้ไม่หมด เหลือ 23.8 ล้านบาท</p>
+    <p style="font-size:25px; color:#C9D1E0; line-height:1.45">ปี 2565 มีรายการอบรม–ดูงานต่างประเทศ 4 รายการ ที่ช่อง "ได้รับจัดสรร" เป็นขีด แต่มียอดเบิกจ่ายรวม 27,262,683.57 บาท ซึ่งมักหมายถึงการโอนเปลี่ยนแปลงระหว่างปี ไม่ใช่เงินนอกระบบ</p>
+  </div>
+  <p style="position:absolute; left:104px; bottom:52px; font-size:24px; color:#6C7789">ที่มา: OPEN SSO รายงานผลการเบิกจ่ายปี 2563–2567 · เผยแพร่โดยสำนักงานประกันสังคม</p>
+</section>
+<section id="local" data-transition="fade" style="background:#F4F1EA; color:#141A28; font-family:'IBM Plex Sans Thai', Tahoma, sans-serif; padding:84px 104px 124px; display:flex; flex-direction:column; gap:28px">
+  <h2 style="font-family:'Noto Serif Thai', Georgia, serif; font-size:56px; font-weight:600; line-height:1.15">ท้องถิ่นใช้เงินตัวเองกับการอบรมเท่าไร</h2>
+  <p style="font-size:29px; color:#5A6472; line-height:1.5; width:1560px">สัดส่วนงบฝึกอบรม ศึกษาดูงาน และเดินทางไปราชการ เทียบกับงบประมาณรวมขององค์กรนั้นเอง — <span style="white-space:nowrap">ฐานเดียวกัน เอกสารฉบับเดียวกัน</span></p>
+  <div style="display:flex; align-items:flex-end; gap:26px; height:330px">
+    <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:14px"><p style="font-size:34px; font-weight:600; color:#B02A1E">5.81%</p><div style="width:100%; height:290px; background:#FF5A4D; border-radius:8px 8px 0 0"></div></div>
+    <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:14px"><p style="font-size:34px; font-weight:600; color:#1E4D6B">1.48%</p><div style="width:100%; height:74px; background:#1E4D6B; border-radius:8px 8px 0 0"></div></div>
+    <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:14px"><p style="font-size:34px; font-weight:600; color:#1E4D6B">1.45%</p><div style="width:100%; height:72px; background:#1E4D6B; border-radius:8px 8px 0 0"></div></div>
+    <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:14px"><p style="font-size:34px; font-weight:600; color:#1E4D6B">1.08%</p><div style="width:100%; height:54px; background:#1E4D6B; border-radius:8px 8px 0 0"></div></div>
+    <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:14px"><p style="font-size:34px; font-weight:600; color:#1E4D6B">0.86%</p><div style="width:100%; height:43px; background:#1E4D6B; border-radius:8px 8px 0 0"></div></div>
+    <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:14px"><p style="font-size:34px; font-weight:600; color:#1E4D6B">0.57%</p><div style="width:100%; height:28px; background:#1E4D6B; border-radius:8px 8px 0 0"></div></div>
+  </div>
+  <div style="display:flex; gap:26px">
+    <p style="flex:1; text-align:center; font-size:26px; color:#B02A1E; font-weight:600; line-height:1.4">อบต.<br>ราชาเทวะ</p>
+    <p style="flex:1; text-align:center; font-size:26px; color:#5A6472; line-height:1.4">อบต.<br>บางเสาธง</p>
+    <p style="flex:1; text-align:center; font-size:26px; color:#5A6472; line-height:1.4">ทม.<br>ปากน้ำ</p>
+    <p style="flex:1; text-align:center; font-size:26px; color:#5A6472; line-height:1.4">อบจ.<br>เชียงใหม่</p>
+    <p style="flex:1; text-align:center; font-size:26px; color:#5A6472; line-height:1.4">อบจ.<br>สมุทรปราการ</p>
+    <p style="flex:1; text-align:center; font-size:26px; color:#5A6472; line-height:1.4">ทน.<br>เชียงใหม่</p>
+  </div>
+  <div style="flex:1"></div>
+  <p style="font-size:34px; line-height:1.5; width:1600px">อบต. ราชาเทวะ ใช้ <span style="color:#B02A1E; font-weight:600">35.7 ล้านบาท</span> จากงบ 613.9 ล้านบาท — สูงกว่าที่อื่น 4 ถึง 10 เท่า · <span style="white-space:nowrap">เป็น อบต. ที่มีรายได้สูงผิดปกติจากพื้นที่อุตสาหกรรม</span></p>
+  <p style="position:absolute; left:104px; bottom:52px; font-size:24px; color:#7A8494">ที่มา: ข้อบัญญัติงบประมาณรายจ่ายของแต่ละองค์กร · อ่านเอกสารได้ 6 จาก 10 แห่ง อีก 4 แห่งเป็นไฟล์สแกนที่อ่านไม่ได้</p>
+</section>
+<section id="subcom" data-transition="fade" style="background:#F4F1EA; color:#141A28; font-family:'IBM Plex Sans Thai', Tahoma, sans-serif; padding:84px 104px 124px; display:flex; flex-direction:column; gap:22px">
+  <h2 style="font-family:'Noto Serif Thai', Georgia, serif; font-size:56px; font-weight:600; line-height:1.15">รัฐสภาตั้งคณะทำงานมาไล่เรื่องนี้โดยเฉพาะ</h2>
+  <div style="background:#0B1020; border-radius:16px; padding:24px 34px; display:flex; flex-direction:column; gap:12px">
+    <p style="font-size:23px; font-weight:600; letter-spacing:3px; color:#F0B429">ชื่อเต็มของคณะอนุกรรมาธิการ</p>
+    <p style="font-family:'Noto Serif Thai', Georgia, serif; font-size:36px; font-weight:600; color:#F4F1EA; line-height:1.35">ฝึกอบรม สัมมนา ประชาสัมพันธ์ ค่าจ้างเหมาบริการ ค่าจ้างที่ปรึกษา ค่าเช่า</p>
+  </div>
+  <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:22px">
+    <div style="background:#FFFFFF; border:1px solid #DCD8CD; border-radius:16px; padding:22px 28px; display:flex; flex-direction:column; gap:6px">
+      <p style="font-size:68px; font-weight:600; line-height:1.05; color:#1E4D6B">184</p>
+      <p style="font-size:26px; color:#5A6472; line-height:1.4">หน่วยงานที่ต้องส่งเล่มชี้แจงงบปี 2570</p>
+    </div>
+    <div style="background:#FFFFFF; border:1px solid #DCD8CD; border-radius:16px; padding:22px 28px; display:flex; flex-direction:column; gap:6px">
+      <p style="font-size:68px; font-weight:600; line-height:1.05; color:#1E4D6B">16</p>
+      <p style="font-size:26px; color:#5A6472; line-height:1.4">หัวข้อในแบบฟอร์มเดียวกันทุกหน่วยงาน</p>
+    </div>
+    <div style="background:#FFFFFF; border:1px solid #DCD8CD; border-radius:16px; padding:22px 28px; display:flex; flex-direction:column; gap:6px">
+      <p style="font-size:68px; font-weight:600; line-height:1.05; color:#1E4D6B">482</p>
+      <p style="font-size:26px; color:#5A6472; line-height:1.4">ไฟล์เอกสารที่เปิดเผยต่อสาธารณะ</p>
+    </div>
+  </div>
+  <div style="flex:1"></div>
+  <p style="font-size:30px; line-height:1.45; width:1600px">ทุกหน่วยงานต้องแจกแจงแยกกันว่า <span style="font-weight:600">ค่าฝึกอบรมและสัมมนา</span> เท่าไร <span style="font-weight:600">เดินทางไปราชการต่างประเทศ</span> เท่าไร ย้อนหลังถึงปี 2565 — ข้อมูลระดับนี้เปิดอยู่แล้ว เพียงแต่กระจัดกระจายอยู่ใน 482 ไฟล์</p>
+  <p style="position:absolute; left:104px; bottom:52px; font-size:24px; color:#7A8494">ที่มา: โฟลเดอร์ "อนุ งบประมาณ" เผยแพร่ประกอบการพิจารณาร่าง พ.ร.บ. งบประมาณรายจ่ายประจำปี 2570</p>
+</section>
+<section id="limits" data-transition="fade" style="background:#F4F1EA; color:#141A28; font-family:'IBM Plex Sans Thai', Tahoma, sans-serif; padding:84px 104px 124px; display:flex; flex-direction:column; gap:32px">
+  <h2 style="font-family:'Noto Serif Thai', Georgia, serif; font-size:56px; font-weight:600; line-height:1.15">สิ่งที่ข้อมูลชุดนี้ตอบไม่ได้</h2>
+  <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:26px">
+    <div style="background:#FFFFFF; border:1px solid #DCD8CD; border-radius:14px; padding:32px 36px; display:flex; flex-direction:column; gap:10px">
+      <h3 style="font-size:30px; font-weight:600; line-height:1.3">ไม่พบสัญญาณทุจริต และตรวจไม่ได้ด้วย</h3>
+      <p style="font-size:25px; color:#5A6472; line-height:1.5">คัดกรอง 2,862 รายการ ไม่มีรายการใดเบิกเกินงบ การทุจริตงบอบรมเกิดที่ใบลงชื่อผู้เข้าอบรมและสัญญาจ้างผู้จัด ซึ่งไม่อยู่ในชุดข้อมูลนี้</p>
+    </div>
+    <div style="background:#FFFFFF; border:1px solid #DCD8CD; border-radius:14px; padding:32px 36px; display:flex; flex-direction:column; gap:10px">
+      <h3 style="font-size:30px; font-weight:600; line-height:1.3">ปีงบประมาณ 2562 ถูกตัดออกทั้งปี</h3>
+      <p style="font-size:25px; color:#5A6472; line-height:1.5">ไฟล์ต้นฉบับเสียหาย กรมประชาสัมพันธ์อ่านได้เป็น 607 ล้านล้านบาท และไม่มีข้อมูลกลาโหมกับการคลังเลย จึงข้ามปีนั้นแทนการเติมตัวเลข</p>
+    </div>
+    <div style="background:#FFFFFF; border:1px solid #DCD8CD; border-radius:14px; padding:32px 36px; display:flex; flex-direction:column; gap:10px">
+      <h3 style="font-size:30px; font-weight:600; line-height:1.3">เอกสารท้องถิ่น 4 แห่งอ่านไม่ได้</h3>
+      <p style="font-size:25px; color:#5A6472; line-height:1.5">อบต. บางบ่อ · บางปลา · บางพลีใหญ่ · ทม. บางแก้ว เป็นไฟล์สแกนภาพที่ไม่มีชั้นข้อความ ตัวเลขของทั้งสี่แห่งจึงไม่ปรากฏ</p>
+    </div>
+    <div style="background:#FFFFFF; border:1px solid #DCD8CD; border-radius:14px; padding:32px 36px; display:flex; flex-direction:column; gap:10px">
+      <h3 style="font-size:30px; font-weight:600; line-height:1.3">เล่มชี้แจง 184 หน่วยงาน ใช้เป็นบริบทเท่านั้น</h3>
+      <p style="font-size:25px; color:#5A6472; line-height:1.5">ชื่อรายการกับจำนวนเงินจับคู่กันไม่น่าเชื่อถือพอ และสองหน่วยงานมีหน่วยในตารางขัดกันเอง จึงไม่นำมาอ้างเป็นตัวเลข</p>
+    </div>
+  </div>
+  <p style="position:absolute; left:104px; bottom:52px; font-size:24px; color:#7A8494">ข้อจำกัดทั้งหมดถูกบันทึกไว้พร้อมที่มาระดับหน้าเอกสาร</p>
+</section>
+<section id="close" data-transition="fade" style="background:#0B1020; color:#F4F1EA; font-family:'IBM Plex Sans Thai', Tahoma, sans-serif; padding:84px 104px; display:flex; flex-direction:column; justify-content:space-between">
+  <p style="font-size:26px; font-weight:600; letter-spacing:3px; color:#F0B429">สรุป</p>
+  <div style="display:flex; flex-direction:column; gap:40px">
+    <h1 style="font-family:'Noto Serif Thai', Georgia, serif; font-size:96px; font-weight:700; line-height:1.18; width:1600px">รัฐลงทุนกับความรู้ของคนที่ทำงานให้รัฐ <span style="color:#F0B429">น้อยลงเรื่อยๆ</span> และใช้เงินที่มีอยู่ไม่หมด</h1>
+    <div style="display:flex; gap:64px">
+      <div style="display:flex; flex-direction:column; gap:8px"><p style="font-size:56px; font-weight:600; color:#F0B429; line-height:1">1 ใน 3</p><p style="font-size:28px; color:#C9D1E0; line-height:1.45">สัดส่วนงบอบรมที่เหลือ<br>เทียบกับปี 2559</p></div>
+      <div style="display:flex; flex-direction:column; gap:8px"><p style="font-size:56px; font-weight:600; color:#F0B429; line-height:1">27%</p><p style="font-size:28px; color:#C9D1E0; line-height:1.45">ของงบที่ตั้งไว้<br>ไม่ถูกใช้เลย</p></div>
+      <div style="display:flex; flex-direction:column; gap:8px"><p style="font-size:56px; font-weight:600; color:#F0B429; line-height:1">44%</p><p style="font-size:28px; color:#C9D1E0; line-height:1.45">ของยอดที่ค้นด้วยคำว่าอบรม<br>ไม่ใช่การอบรมจริง</p></div>
+    </div>
+  </div>
+  <div style="display:flex; align-items:flex-end; justify-content:space-between">
+    <p style="font-size:30px; color:#8A94A6; line-height:1.5"><span style="white-space:nowrap">Watcharapol Limthammalert</span><br><span style="color:#F0B429; font-weight:600">AI Trainer Thailand</span></p>
+    <p style="font-size:24px; color:#6C7789; text-align:right; line-height:1.6">วิเคราะห์จากรายการงบประมาณ 2.1 ล้านรายการ<br>เอกสารชี้แจง 168 ฉบับ และข้อบัญญัติท้องถิ่น</p>
+  </div>
+</section>
+</div>
+<div id="counter"></div>
+<div id="hint">← → เปลี่ยนหน้า</div>
+<script>
+(function(){
+  var S = Array.prototype.slice.call(document.querySelectorAll('.stage > section'));
+  var i = 0, stage = document.getElementById('stage');
+  var counter = document.getElementById('counter');
+
+  function fit(){
+    var k = Math.min(innerWidth / 1920, innerHeight / 1080);
+    stage.style.transform = 'translate(-50%,-50%) scale(' + k + ')';
+  }
+
+  function show(n){
+    i = Math.max(0, Math.min(S.length - 1, n));
+    for (var j = 0; j < S.length; j++) S[j].style.display = (j === i) ? '' : 'none';
+    counter.textContent = (i + 1) + ' / ' + S.length;
+    if (location.hash !== '#' + (i + 1)) history.replaceState(null, '', '#' + (i + 1));
+  }
+
+  addEventListener('resize', fit);
+  addEventListener('keydown', function(e){
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ' || e.key === 'PageDown'){ e.preventDefault(); show(i + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp'){ e.preventDefault(); show(i - 1); }
+    else if (e.key === 'Home'){ show(0); }
+    else if (e.key === 'End'){ show(S.length - 1); }
+  });
+  addEventListener('click', function(e){ show(i + (e.clientX < innerWidth * 0.28 ? -1 : 1)); });
+
+  var x0 = null;
+  addEventListener('touchstart', function(e){ x0 = e.touches[0].clientX; }, {passive:true});
+  addEventListener('touchend', function(e){
+    if (x0 === null) return;
+    var dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 45) show(i + (dx < 0 ? 1 : -1));
+    x0 = null;
+  }, {passive:true});
+
+  var start = parseInt((location.hash || '').slice(1), 10);
+  fit();
+  show(isNaN(start) ? 0 : start - 1);
+})();
+</script>
+</body>
+</html>
